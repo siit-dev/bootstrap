@@ -1,0 +1,20 @@
+// Re-emit only the selectors present in bootstrap-grid.css. Breakpoint
+// selection and utility names remain structural Sass.
+
+@import "containers";
+@import "grid";
+
+$utilities: $runtime-grid-custom-utilities;
+@import "utilities";
+$utilities: map-get-multiple($utilities, $grid-utility-names);
+@import "utilities/api";
+
+$enable-runtime-values: $runtime-grid-enable-runtime-values-fallback !global;
+$spacer: $runtime-grid-spacer-fallback !global;
+$grid-gutter-width: $runtime-grid-gutter-width-fallback !global;
+$container-padding-x: $runtime-grid-container-padding-x-fallback !global;
+$spacers: $runtime-grid-spacers-fallback !global;
+$gutters: $runtime-grid-gutters-fallback !global;
+$negative-spacers: $runtime-grid-negative-spacers-fallback !global;
+$container-max-widths: $runtime-grid-container-max-widths-fallback !global;
+$utilities: $runtime-grid-utilities-fallback !global;

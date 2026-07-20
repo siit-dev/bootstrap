@@ -115,11 +115,11 @@
 }
 .carousel-control-prev {
   left: 0;
-  background-image: if($enable-gradients, linear-gradient(90deg, rgba($black, .25), rgba($black, .001)), null);
+  background-image: if($enable-gradients, linear-gradient(90deg, rgba-css-color($black, .25), rgba-css-color($black, .001)), null);
 }
 .carousel-control-next {
   right: 0;
-  background-image: if($enable-gradients, linear-gradient(270deg, rgba($black, .25), rgba($black, .001)), null);
+  background-image: if($enable-gradients, linear-gradient(270deg, rgba-css-color($black, .25), rgba-css-color($black, .001)), null);
 }
 
 // Icons for within
@@ -191,9 +191,9 @@
 
 .carousel-caption {
   position: absolute;
-  right: (100% - $carousel-caption-width) * .5;
+  right: multiply(subtract(100%, $carousel-caption-width), .5);
   bottom: $carousel-caption-spacer;
-  left: (100% - $carousel-caption-width) * .5;
+  left: multiply(subtract(100%, $carousel-caption-width), .5);
   padding-top: $carousel-caption-padding-y;
   padding-bottom: $carousel-caption-padding-y;
   color: var(--#{$prefix}carousel-caption-color);

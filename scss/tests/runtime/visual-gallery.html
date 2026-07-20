@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap runtime visual parity gallery</title>
+    <script>
+      'use strict'
+
+      const stylesheet = new URLSearchParams(window.location.search).get('stylesheet') || '/dist/css/bootstrap.css'
+      document.write(`<link rel="stylesheet" href="${stylesheet}">`)
+    </script>
+    <style>
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        caret-color: transparent !important;
+        transition: none !important;
+      }
+
+      body {
+        padding: 24px;
+      }
+
+      .gallery {
+        display: grid;
+        gap: 24px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .gallery-section {
+        min-width: 0;
+      }
+
+      .gallery-wide {
+        grid-column: 1 / -1;
+      }
+
+      .swatch {
+        height: 48px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="gallery">
+      <section class="gallery-section">
+        <h1>Typography heading</h1>
+        <p class="lead">Lead text with a <a href="#">standard link</a>, <mark>highlight</mark>, and <code>inline code</code>.</p>
+        <div class="fs-1">Font size utility</div>
+        <blockquote class="blockquote">
+          <p>Bootstrap blockquote rendering.</p>
+          <footer class="blockquote-footer">Visual parity fixture</footer>
+        </blockquote>
+      </section>
+
+      <section class="gallery-section">
+        <h2>Buttons and badges</h2>
+        <div class="d-flex flex-wrap gap-2 mb-3">
+          <button class="btn btn-primary">Primary</button>
+          <button class="btn btn-secondary">Secondary</button>
+          <button class="btn btn-success">Success</button>
+          <button class="btn btn-danger">Danger</button>
+          <button class="btn btn-warning">Warning</button>
+          <button class="btn btn-info">Info</button>
+          <button class="btn btn-light">Light</button>
+          <button class="btn btn-dark">Dark</button>
+        </div>
+        <div class="d-flex flex-wrap gap-2 mb-3">
+          <button class="btn btn-outline-primary">Outline</button>
+          <button class="btn btn-primary active">Active</button>
+          <button class="btn btn-primary" disabled>Disabled</button>
+          <span class="badge text-bg-primary">Primary badge</span>
+          <span class="badge rounded-pill text-bg-danger">Pill badge</span>
+        </div>
+      </section>
+
+      <section class="gallery-section">
+        <h2>Alerts and progress</h2>
+        <div class="alert alert-primary">Primary alert with <a class="alert-link" href="#">an alert link</a>.</div>
+        <div class="alert alert-success">Success alert</div>
+        <div class="alert alert-danger mb-3">Danger alert</div>
+        <div class="progress mb-2" role="progressbar" aria-label="Progress">
+          <div class="progress-bar" style="width: 42%">42%</div>
+        </div>
+        <div class="progress-stacked">
+          <div class="progress" style="width: 30%"><div class="progress-bar bg-success"></div></div>
+          <div class="progress" style="width: 20%"><div class="progress-bar bg-warning"></div></div>
+        </div>
+      </section>
+
+      <section class="gallery-section">
+        <h2>Forms</h2>
+        <div class="row g-3">
+          <div class="col-7">
+            <label class="form-label" for="email">Email address</label>
+            <input class="form-control" id="email" value="shop@example.com">
+          </div>
+          <div class="col-5">
+            <label class="form-label" for="select">Selection</label>
+            <select class="form-select" id="select"><option>Selected option</option></select>
+          </div>
+          <div class="col-12">
+            <div class="input-group">
+              <span class="input-group-text">@</span>
+              <input class="form-control is-valid" value="validated">
+              <button class="btn btn-outline-secondary">Submit</button>
+            </div>
+          </div>
+          <div class="col-12 d-flex gap-4">
+            <div class="form-check"><input class="form-check-input" type="checkbox" checked id="check"><label class="form-check-label" for="check">Checked</label></div>
+            <div class="form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" checked id="switch"><label class="form-check-label" for="switch">Switch</label></div>
+            <input class="form-range flex-grow-1" type="range" value="60">
+          </div>
+        </div>
+      </section>
+
+      <section class="gallery-section gallery-wide">
+        <h2>Table variants</h2>
+        <table class="table table-striped table-hover table-bordered align-middle">
+          <thead><tr><th>Variant</th><th>Value</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr class="table-primary"><th>Primary</th><td>Reactive color</td><td>Ready</td></tr>
+            <tr class="table-success"><th>Success</th><td>Derived background</td><td>Passed</td></tr>
+            <tr class="table-danger"><th>Danger</th><td>Contrast text</td><td>Checked</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="gallery-section">
+        <h2>Navigation</h2>
+        <ul class="nav nav-tabs mb-3">
+          <li class="nav-item"><a class="nav-link active" href="#">Active</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Link</a></li>
+          <li class="nav-item"><a class="nav-link disabled" href="#">Disabled</a></li>
+        </ul>
+        <nav aria-label="Pagination">
+          <ul class="pagination">
+            <li class="page-item disabled"><a class="page-link" href="#">Previous</a></li>
+            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+            <li class="page-item"><a class="page-link" href="#">2</a></li>
+            <li class="page-item"><a class="page-link" href="#">Next</a></li>
+          </ul>
+        </nav>
+        <div class="dropdown-menu show position-static">
+          <h6 class="dropdown-header">Dropdown header</h6>
+          <a class="dropdown-item active" href="#">Active item</a>
+          <a class="dropdown-item" href="#">Regular item</a>
+        </div>
+      </section>
+
+      <section class="gallery-section">
+        <h2>Cards and lists</h2>
+        <div class="card mb-3">
+          <div class="card-header">Featured card</div>
+          <div class="card-body">
+            <h5 class="card-title">Runtime configuration</h5>
+            <p class="card-text">Default Bootstrap rendering must remain pixel-identical.</p>
+            <a class="btn btn-primary" href="#">Action</a>
+          </div>
+        </div>
+        <div class="list-group">
+          <a class="list-group-item list-group-item-action active" href="#">Active item</a>
+          <a class="list-group-item list-group-item-action" href="#">Standard item</a>
+          <a class="list-group-item list-group-item-action disabled" href="#">Disabled item</a>
+        </div>
+      </section>
+
+      <section class="gallery-section">
+        <h2>Accordion and breadcrumb</h2>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb"><li class="breadcrumb-item"><a href="#">Home</a></li><li class="breadcrumb-item active">Current</li></ol>
+        </nav>
+        <div class="accordion">
+          <div class="accordion-item">
+            <h2 class="accordion-header"><button class="accordion-button">Open accordion item</button></h2>
+            <div class="accordion-collapse collapse show"><div class="accordion-body">Visible accordion content.</div></div>
+          </div>
+          <div class="accordion-item">
+            <h2 class="accordion-header"><button class="accordion-button collapsed">Closed accordion item</button></h2>
+          </div>
+        </div>
+      </section>
+
+      <section class="gallery-section">
+        <h2>Utilities</h2>
+        <div class="d-grid gap-2">
+          <div class="p-3 rounded border shadow-sm bg-primary text-white">Spacing, radius, shadow, and color</div>
+          <div class="p-2 rounded-pill border border-danger text-danger text-center">Pill border</div>
+          <div class="d-flex gap-2">
+            <div class="swatch bg-success bg-opacity-75 flex-fill rounded"></div>
+            <div class="swatch bg-warning bg-opacity-50 flex-fill rounded"></div>
+            <div class="swatch bg-danger bg-opacity-25 flex-fill rounded"></div>
+          </div>
+          <div><span class="spinner-border text-primary" aria-hidden="true"></span> <span class="spinner-grow text-success" aria-hidden="true"></span></div>
+        </div>
+      </section>
+
+      <section class="gallery-section gallery-wide rounded p-4" data-bs-theme="dark">
+        <h2>Dark mode</h2>
+        <div class="row g-3">
+          <div class="col"><div class="alert alert-primary mb-0">Dark primary alert</div></div>
+          <div class="col"><div class="card"><div class="card-body">Dark card body</div></div></div>
+          <div class="col"><button class="btn btn-primary">Dark primary button</button></div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

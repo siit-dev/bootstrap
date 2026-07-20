@@ -1,0 +1,17 @@
+// Capture consumer utility additions and overrides before runtime values are
+// assigned. Rebuilding Bootstrap's defaults from an empty map gives us the
+// exact custom delta without dropping standard utility entries.
+
+$runtime-map-fallback-utilities: $utilities;
+$utilities: ();
+@import "utilities";
+$runtime-default-utilities-fallback: $utilities;
+$runtime-custom-utilities: ();
+
+@each $name, $utility in $runtime-map-fallback-utilities {
+  @if not map-has-key($runtime-default-utilities-fallback, $name) or $utility != map-get($runtime-default-utilities-fallback, $name) {
+    $runtime-custom-utilities: map-merge($runtime-custom-utilities, ($name: $utility));
+  }
+}
+
+$utilities: $runtime-map-fallback-utilities;

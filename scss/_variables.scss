@@ -2,6 +2,10 @@
 //
 // Variables should follow the `$component-state-property-size` formula for
 // consistent naming. Ex: $nav-link-disabled-color and $modal-content-box-shadow-xs.
+//
+// This remains Bootstrap's public Sass configuration entrypoint. The runtime
+// generator reads these !default declarations and writes their dependency
+// references to `_runtime.scss`; explicit Sass overrides remain leaf inputs.
 
 // Color system
 

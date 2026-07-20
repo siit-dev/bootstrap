@@ -43,7 +43,11 @@
 }
 
 .progress-bar-striped {
-  @include gradient-striped();
+  @if $enable-runtime-values {
+    @include gradient-striped(rgba-css-color($white, .15));
+  } @else {
+    @include gradient-striped();
+  }
   background-size: var(--#{$prefix}progress-height) var(--#{$prefix}progress-height);
 }
 

@@ -18,7 +18,11 @@
   --#{$prefix}btn-hover-border-color: transparent;
   --#{$prefix}btn-box-shadow: #{$btn-box-shadow};
   --#{$prefix}btn-disabled-opacity: #{$btn-disabled-opacity};
-  --#{$prefix}btn-focus-box-shadow: 0 0 0 #{$btn-focus-width} rgba(var(--#{$prefix}btn-focus-shadow-rgb), .5);
+  @if $enable-runtime-values {
+    --#{$prefix}btn-focus-box-shadow: 0 0 0 #{$btn-focus-width} #{rgba-css-rgb-var("btn-focus-shadow", .5)};
+  } @else {
+    --#{$prefix}btn-focus-box-shadow: 0 0 0 #{$btn-focus-width} rgba(var(--#{$prefix}btn-focus-shadow-rgb), .5);
+  }
   // scss-docs-end btn-css-vars
 
   display: inline-block;

@@ -24,6 +24,32 @@ These variables are scoped to our built-in dark mode.
 
 <Code lang="css" filePath="dist/css/bootstrap.css" fileMatch="(\[data-bs-theme=dark\] {[^}]*})" />
 
+## Reactive runtime theming
+
+This build keeps Bootstrap 5.3.8's Sass API and stock declarations, then adds a browser-side dependency graph for runtime settings. Changing a root input recalculates dependent component colors, states, spacing, radii, shadows, and responsive values without recompiling Bootstrap.
+
+For example, a Shopify theme can map its settings to three high-level inputs:
+
+```css
+:root {
+  --bs-primary: #7654ff;
+  --bs-spacer: calc(1rem + 2px);
+  --bs-border-radius: .75rem;
+}
+```
+
+Button hover and active colors, alerts, tables, links, color utilities, component spacing, and derived radii continue to reference those inputs. Mixed units are supported because arithmetic remains in native `calc()`, `min()`, `max()`, and `clamp()` expressions.
+
+The original 5.3.8 declarations remain earlier in the compiled stylesheet for source compatibility. The reactive declaration pass targets browsers with CSS custom properties, `color-mix()`, relative colors, and native CSS math; it does not depend on `contrast-color()` or a feature-query wrapper. In that path, `--bs-*-rgb` properties contain colors rather than comma-separated channels. Apply alpha with relative color syntax:
+
+```css
+.example {
+  color: rgb(from var(--bs-primary-rgb) r g b / .5);
+}
+```
+
+Breakpoints, generated class counts, feature flags, selector names, and embedded SVG data images remain compile-time Sass. Embedded SVG colors are not recalculated after a root override.
+
 ## Component variables
 
 Bootstrap 5 is increasingly making use of custom properties as local variables for various components. This way we reduce our compiled CSS, ensure styles aren’t inherited in places like nested tables, and allow some basic restyling and extending of Bootstrap components after Sass compilation.

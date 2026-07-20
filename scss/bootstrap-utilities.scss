@@ -17,3 +17,18 @@
 
 // Utilities
 @import "utilities/api";
+
+@import "runtime-utilities";
+@import "runtime";
+
+@import "helpers";
+
+// Rebuild runtime defaults and merge consumer additions/overrides back in.
+// stylelint-disable-next-line scss/dollar-variable-default
+$utilities: $runtime-custom-utilities !global;
+@import "utilities";
+@import "utilities/api";
+
+@import "runtime-restore";
+// stylelint-disable-next-line scss/dollar-variable-default
+$utilities: $runtime-map-fallback-utilities !global;

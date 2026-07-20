@@ -2,6 +2,10 @@
 //
 // Utility mixins and functions for evaluating source code across our variables, maps, and mixins.
 
+// Set to true only for Bootstrap's second runtime declaration pass. Keeping the
+// default false preserves the exact Bootstrap 5 output for existing imports.
+$enable-runtime-values: false !default;
+
 // Ascending
 // Used to evaluate Sass maps like our grid breakpoints.
 @mixin _assert-ascending($map, $map-name) {
@@ -33,19 +37,118 @@
 }
 
 // Colors
+// Return whether a value contains browser-side CSS that Sass cannot safely
+// inspect or calculate. Public helpers use this to preserve their Bootstrap
+// 5.3.8 behavior for literal inputs while returning native CSS for runtime
+// values.
+@function is-css-runtime-value($value) {
+  $serialized: inspect($value);
+
+  @return str-index($serialized, "var(") or
+    str-index($serialized, "calc(") or
+    str-index($serialized, "min(") or
+    str-index($serialized, "max(") or
+    str-index($serialized, "clamp(") or
+    str-index($serialized, "color-mix(") or
+    str-index($serialized, "color(from ") or
+    str-index($serialized, "from ");
+}
+
+// Build an unquoted native CSS function without asking Sass to evaluate it.
+@function css-native-function($name, $arguments) {
+  @return unquote("#{$name}(#{$arguments})");
+}
+
+@function round-css-color($color) {
+  // The epsilon counteracts floating-point values just below an exact .5
+  // boundary so native rounding follows Sass's half-up channel rounding.
+  @return css-native-function(
+    "rgb",
+    "from #{$color} round(calc(r + .01)) round(calc(g + .01)) round(calc(b + .01)) / alpha"
+  );
+}
+
+@function mix-color($color1, $color2, $weight: 50%) {
+  @if is-css-runtime-value($color1) or is-css-runtime-value($color2) or is-css-runtime-value($weight) {
+    $mixed: css-native-function("color-mix", "in srgb, #{$color1} #{$weight}, #{$color2}");
+
+    // Sass color functions serialize integer sRGB channels. Rounding the
+    // browser-side result preserves those stock pixels before runtime inputs
+    // are overridden, including when a color is composited in a box-shadow.
+    @return round-css-color($mixed);
+  }
+
+  @return mix($color1, $color2, $weight);
+}
+
+@function to-percentage($value) {
+  @if is-css-runtime-value($value) {
+    @return calc(#{$value} * 100%);
+  }
+
+  @return percentage($value);
+}
+
+@function multiply($value1, $value2) {
+  @if is-css-runtime-value($value1) or is-css-runtime-value($value2) {
+    @return calc(#{$value1} * #{$value2});
+  }
+
+  @return $value1 * $value2;
+}
+
+@function unitless-to-em($value) {
+  @if is-css-runtime-value($value) {
+    @return calc(#{$value} * 1em);
+  }
+
+  @return if(unit($value) == "", $value * 1em, $value);
+}
+
 @function to-rgb($value) {
+  @if is-css-runtime-value($value) {
+    @return css-native-function("rgb", "from #{$value} r g b");
+  }
+
   @return red($value), green($value), blue($value);
 }
 
 // stylelint-disable scss/dollar-variable-pattern
 @function rgba-css-var($identifier, $target) {
+  $color-variable: "--#{$prefix}#{$identifier}-rgb";
+
   @if $identifier == "body" and $target == "bg" {
-    @return rgba(var(--#{$prefix}#{$identifier}-bg-rgb), var(--#{$prefix}#{$target}-opacity));
+    $color-variable: "--#{$prefix}#{$identifier}-bg-rgb";
   } @if $identifier == "body" and $target == "text" {
-    @return rgba(var(--#{$prefix}#{$identifier}-color-rgb), var(--#{$prefix}#{$target}-opacity));
-  } @else {
-    @return rgba(var(--#{$prefix}#{$identifier}-rgb), var(--#{$prefix}#{$target}-opacity));
+    $color-variable: "--#{$prefix}#{$identifier}-color-rgb";
   }
+
+  @if $enable-runtime-values {
+    @return css-native-function("rgb", "from var(#{$color-variable}) r g b / var(--#{$prefix}#{$target}-opacity)");
+  }
+
+  @return rgba(var(#{$color-variable}), var(--#{$prefix}#{$target}-opacity));
+}
+
+// Apply an alpha to one of Bootstrap's `-rgb` custom properties. In the
+// fallback pass that property remains the Bootstrap 5 comma channel list; in
+// the runtime pass it is a color and relative rgb() supplies the alpha.
+@function rgba-css-rgb-var($identifier, $alpha) {
+  @if $enable-runtime-values {
+    @return css-native-function("rgb", "from var(--#{$prefix}#{$identifier}-rgb) r g b / #{$alpha}");
+  }
+
+  @return rgba(var(--#{$prefix}#{$identifier}-rgb), $alpha);
+}
+
+// Preserve Sass rgba() for literal colors and defer alpha application for
+// runtime colors.
+@function rgba-css-color($color, $alpha) {
+  @if is-css-runtime-value($color) {
+    @return css-native-function("rgb", "from #{$color} r g b / #{$alpha}");
+  }
+
+  @return rgba($color, $alpha);
 }
 
 @function map-loop($map, $func, $args...) {
@@ -79,7 +182,8 @@
   $result: ();
   @each $key, $value in $map {
     @if $key != 0 {
-      $result: map-merge($result, ("n" + $key: (-$value)));
+      $negative-value: if(is-css-runtime-value($value), calc(-1 * #{$value}), -$value);
+      $result: map-merge($result, ("n" + $key: $negative-value));
     }
   }
   @return $result;
@@ -151,6 +255,25 @@
 $_luminance-list: .0008 .001 .0011 .0013 .0015 .0017 .002 .0022 .0025 .0027 .003 .0033 .0037 .004 .0044 .0048 .0052 .0056 .006 .0065 .007 .0075 .008 .0086 .0091 .0097 .0103 .011 .0116 .0123 .013 .0137 .0144 .0152 .016 .0168 .0176 .0185 .0194 .0203 .0212 .0222 .0232 .0242 .0252 .0262 .0273 .0284 .0296 .0307 .0319 .0331 .0343 .0356 .0369 .0382 .0395 .0409 .0423 .0437 .0452 .0467 .0482 .0497 .0513 .0529 .0545 .0561 .0578 .0595 .0612 .063 .0648 .0666 .0685 .0704 .0723 .0742 .0762 .0782 .0802 .0823 .0844 .0865 .0887 .0908 .0931 .0953 .0976 .0999 .1022 .1046 .107 .1095 .1119 .1144 .117 .1195 .1221 .1248 .1274 .1301 .1329 .1356 .1384 .1413 .1441 .147 .15 .1529 .1559 .159 .162 .1651 .1683 .1714 .1746 .1779 .1812 .1845 .1878 .1912 .1946 .1981 .2016 .2051 .2086 .2122 .2159 .2195 .2232 .227 .2307 .2346 .2384 .2423 .2462 .2502 .2542 .2582 .2623 .2664 .2705 .2747 .2789 .2831 .2874 .2918 .2961 .3005 .305 .3095 .314 .3185 .3231 .3278 .3325 .3372 .3419 .3467 .3515 .3564 .3613 .3663 .3712 .3763 .3813 .3864 .3916 .3968 .402 .4072 .4125 .4179 .4233 .4287 .4342 .4397 .4452 .4508 .4564 .4621 .4678 .4735 .4793 .4851 .491 .4969 .5029 .5089 .5149 .521 .5271 .5333 .5395 .5457 .552 .5583 .5647 .5711 .5776 .5841 .5906 .5972 .6038 .6105 .6172 .624 .6308 .6376 .6445 .6514 .6584 .6654 .6724 .6795 .6867 .6939 .7011 .7084 .7157 .7231 .7305 .7379 .7454 .7529 .7605 .7682 .7758 .7835 .7913 .7991 .807 .8148 .8228 .8308 .8388 .8469 .855 .8632 .8714 .8796 .8879 .8963 .9047 .9131 .9216 .9301 .9387 .9473 .956 .9647 .9734 .9823 .9911 1;
 
 @function color-contrast($background, $color-contrast-dark: $color-contrast-dark, $color-contrast-light: $color-contrast-light, $min-contrast-ratio: $min-contrast-ratio) {
+  @if is-css-runtime-value($background) or is-css-runtime-value($min-contrast-ratio) {
+    $runtime-min-contrast-ratio: if(
+      $enable-runtime-values,
+      var(--#{$prefix}min-contrast-ratio),
+      $min-contrast-ratio
+    );
+    $threshold: calc(1.05 / #{$runtime-min-contrast-ratio} - .05);
+    // XYZ Y is WCAG relative luminance. Scale the distance from Bootstrap's
+    // configured threshold into a clamped 0/1 switch, then emit the D65 white
+    // point or black. The tiny equality bias preserves Bootstrap's preference
+    // for the light candidate when its ratio exactly meets the threshold.
+    $light-switch: clamp(0, calc((#{$threshold} - y + .0000001) * 10000000), 1);
+
+    @return css-native-function(
+      "color",
+      "from #{$background} xyz-d65 calc(#{$light-switch} * .9504559271) #{$light-switch} calc(#{$light-switch} * 1.0890577508)"
+    );
+  }
+
   $foregrounds: $color-contrast-light, $color-contrast-dark, $white, $black;
   $max-ratio: 0;
   $max-ratio-color: null;
@@ -171,6 +294,10 @@ $_luminance-list: .0008 .001 .0011 .0013 .0015 .0017 .002 .0022 .0025 .0027 .003
 }
 
 @function contrast-ratio($background, $foreground: $color-contrast-light) {
+  @if is-css-runtime-value($background) or is-css-runtime-value($foreground) {
+    @error "contrast-ratio() can only return a numeric Sass value for literal colors. Use color-contrast() for runtime CSS colors.";
+  }
+
   $l1: luminance($background);
   $l2: luminance(opaque($background, $foreground));
 
@@ -181,6 +308,10 @@ $_luminance-list: .0008 .001 .0011 .0013 .0015 .0017 .002 .0022 .0025 .0027 .003
 // See https://www.w3.org/TR/WCAG/#dfn-relative-luminance
 // See https://www.w3.org/TR/WCAG/#dfn-contrast-ratio
 @function luminance($color) {
+  @if is-css-runtime-value($color) {
+    @error "luminance() can only return a numeric Sass value for literal colors.";
+  }
+
   $rgb: (
     "r": red($color),
     "g": green($color),
@@ -198,22 +329,80 @@ $_luminance-list: .0008 .001 .0011 .0013 .0015 .0017 .002 .0022 .0025 .0027 .003
 // Return opaque color
 // opaque(#fff, rgba(0, 0, 0, .5)) => #808080
 @function opaque($background, $foreground) {
+  @if is-css-runtime-value($background) or is-css-runtime-value($foreground) {
+    @if is-css-runtime-value($foreground) {
+      @error "opaque() cannot extract a runtime foreground alpha channel. Pass a literal Sass foreground color.";
+    }
+
+    @return mix-color(rgba($foreground, 1), $background, opacity($foreground) * 100%);
+  }
+
   @return mix(rgba($foreground, 1), $background, opacity($foreground) * 100%);
 }
 
 // scss-docs-start color-functions
 // Tint a color: mix a color with white
 @function tint-color($color, $weight) {
+  @if is-css-runtime-value($color) or is-css-runtime-value($weight) {
+    @return mix-color(white, $color, $weight);
+  }
+
   @return mix(white, $color, $weight);
 }
 
 // Shade a color: mix a color with black
 @function shade-color($color, $weight) {
+  @if is-css-runtime-value($color) or is-css-runtime-value($weight) {
+    @return mix-color(black, $color, $weight);
+  }
+
   @return mix(black, $color, $weight);
+}
+
+// Shift links away from their selected contrast foreground. This is the
+// browser-side equivalent of Bootstrap's shade-for-dark/tint-for-light branch.
+@function contrast-shift-color($color, $shade-weight, $tint-weight: $shade-weight) {
+  @if is-css-runtime-value($color) {
+    $opposite-contrast: css-native-function(
+      "rgb",
+      "from #{color-contrast($color)} calc(255 - r) calc(255 - g) calc(255 - b)"
+    );
+
+    @if $shade-weight != $tint-weight {
+      // Keep the outer mix at the shade weight. When the contrast color is
+      // black (so the mix color is white), reduce white's alpha so the
+      // premultiplied mix is mathematically equivalent to the tint weight.
+      $shade-number: calc(#{$shade-weight} / 100%);
+      $tint-number: calc(#{$tint-weight} / 100%);
+      $tint-alpha: calc((1 - #{$shade-number}) * #{$tint-number} / (#{$shade-number} * (1 - #{$tint-number})));
+      $opposite-contrast: css-native-function(
+        "rgb",
+        "from #{$opposite-contrast} r g b / calc(1 + r / 255 * (#{$tint-alpha} - 1))"
+      );
+    }
+
+    $mixed: mix-color($opposite-contrast, $color, $shade-weight);
+
+    @return css-native-function("rgb", "from #{$mixed} r g b / 1");
+  }
+
+  @return if(
+    color-contrast($color) == $color-contrast-light,
+    shade-color($color, $shade-weight),
+    tint-color($color, $tint-weight)
+  );
 }
 
 // Shade the color if the weight is positive, else tint it
 @function shift-color($color, $weight) {
+  @if is-css-runtime-value($color) {
+    @if type-of($weight) != number {
+      @error "Runtime shift-color() weights must retain a compile-time sign.";
+    }
+
+    @return if($weight > 0, shade-color($color, $weight), tint-color($color, -$weight));
+  }
+
   @return if($weight > 0, shade-color($color, $weight), tint-color($color, -$weight));
 }
 // scss-docs-end color-functions
@@ -260,6 +449,10 @@ $_luminance-list: .0008 .001 .0011 .0013 .0015 .0017 .002 .0022 .0025 .0027 .003
 }
 
 @function divide($dividend, $divisor, $precision: 10) {
+  @if is-css-runtime-value($dividend) or is-css-runtime-value($divisor) {
+    @return calc(#{$dividend} / #{$divisor});
+  }
+
   $sign: if($dividend > 0 and $divisor > 0 or $dividend < 0 and $divisor < 0, 1, -1);
   $dividend: abs($dividend);
   $divisor: abs($divisor);

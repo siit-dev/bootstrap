@@ -1,18 +1,9 @@
-@import "mixins/banner";
-@include bsBanner("");
+// Runtime component output
+//
+// Bootstrap's regular component output above this import is the exact
+// progressive fallback. The second declaration pass targets browsers with
+// custom properties, color-mix(), relative colors, and native CSS math.
 
-
-// scss-docs-start import-stack
-// Configuration
-@import "functions";
-@import "variables";
-@import "variables-dark";
-@import "maps";
-@import "mixins";
-@import "utilities";
-
-// Layout & components
-@import "root";
 @import "reboot";
 @import "type";
 @import "images";
@@ -44,17 +35,12 @@
 @import "offcanvas";
 @import "placeholders";
 
-// Helpers
 @import "helpers";
 
-// Utilities
+// Rebuild runtime defaults and merge consumer additions/overrides back in.
+$utilities: $runtime-custom-utilities !global;
+@import "utilities";
 @import "utilities/api";
 
-// Progressive runtime theming
-@import "runtime-utilities";
-@import "runtime";
-// Refresh mixin defaults after runtime globals are assigned. This emits no CSS
-// and preserves every public mixin name and signature.
-@import "mixins";
-@import "runtime-api";
-// scss-docs-end import-stack
+@import "runtime-restore";
+$utilities: $runtime-map-fallback-utilities !global;

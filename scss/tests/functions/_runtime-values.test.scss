@@ -1,0 +1,82 @@
+@import "../../functions";
+@import "../../variables";
+@import "../../variables-dark";
+@import "../../maps";
+@import "../../vendor/rfs";
+
+@include describe("runtime CSS value shims") {
+  @include it("preserves literal Bootstrap color results") {
+    @include assert-equal(tint-color(#0d6efd, 20%), #3d8bfd);
+    @include assert-equal(shade-color(#0d6efd, 20%), #0a58ca);
+    @include assert-equal(to-rgb(#0d6efd), (13, 110, 253));
+  }
+
+  @include it("returns native color expressions for runtime inputs") {
+    @include assert-equal(
+      tint-color(var(--theme-color), 20%),
+      unquote("rgb(from color-mix(in srgb, white 20%, var(--theme-color)) round(calc(r + .01)) round(calc(g + .01)) round(calc(b + .01)) / alpha)")
+    );
+    @include assert-equal(
+      shade-color(var(--theme-color), 20%),
+      unquote("rgb(from color-mix(in srgb, black 20%, var(--theme-color)) round(calc(r + .01)) round(calc(g + .01)) round(calc(b + .01)) / alpha)")
+    );
+    @include assert-equal(
+      to-rgb(var(--theme-color)),
+      unquote("rgb(from var(--theme-color) r g b)")
+    );
+  }
+
+  @include it("preserves literal arithmetic and defers mixed units") {
+    @include assert-equal(multiply(1rem, .5), .5rem);
+    @include assert-equal(divide(1rem, 2), .5rem);
+    @include assert-true(
+      str-index(inspect(multiply(var(--space), .5)), "calc(var(--space) * 0.5)") != null
+    );
+    @include assert-true(
+      str-index(inspect(add(var(--space), 2px)), "calc(var(--space) + 2px)") != null
+    );
+  }
+
+  @include it("uses threshold-adjusted native contrast") {
+    $result: inspect(color-contrast(var(--theme-color)));
+
+    @include assert-true(str-index($result, "contrast-color(") == null);
+    @include assert-true(str-index($result, "clamp(") != null);
+    @include assert-true(str-index($result, "xyz-d65") != null);
+    @include assert-true(str-index($result, "4.5") != null);
+  }
+
+  @include it("composites a literal foreground over a runtime background exactly") {
+    @include assert-equal(
+      opaque(var(--background), rgba(0, 0, 0, .25)),
+      unquote("rgb(from color-mix(in srgb, black 25%, var(--background)) round(calc(r + .01)) round(calc(g + .01)) round(calc(b + .01)) / alpha)")
+    );
+  }
+
+  @include it("uses color-valued rgb variables only in the runtime pass") {
+    @include assert-equal(
+      rgba-css-var("primary", "text"),
+      rgba(var(--bs-primary-rgb), var(--bs-text-opacity))
+    );
+
+    $enable-runtime-values: true !global;
+
+    @include assert-equal(
+      rgba-css-var("primary", "text"),
+      unquote("rgb(from var(--bs-primary-rgb) r g b / var(--bs-text-opacity))")
+    );
+
+    $enable-runtime-values: false !global;
+  }
+
+  @include it("builds browser-side RFS formulas for mixed units") {
+    $enable-runtime-values: true !global;
+    $result: inspect(rfs-fluid-value(calc(2rem + 2px)));
+
+    @include assert-true(str-index($result, "min(") != null);
+    @include assert-true(str-index($result, "clamp(") != null);
+    @include assert-true(str-index($result, "--bs-rfs-factor") != null);
+
+    $enable-runtime-values: false !global;
+  }
+}

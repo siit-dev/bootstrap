@@ -37,6 +37,8 @@ Thumbs.db
 /dist-sass/
 /js/coverage/
 /node_modules/
+/.playwright-cli/
+/output/playwright/
 
 # Site
 /site/dist

@@ -18,7 +18,7 @@
     height: 100%; // allow textareas
     padding: $form-floating-padding-y $form-floating-padding-x;
     overflow: hidden;
-    color: rgba(var(--#{$prefix}body-color-rgb), #{$form-floating-label-opacity});
+    color: rgba-css-rgb-var("body-color", $form-floating-label-opacity);
     text-align: start;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -72,7 +72,7 @@
   > textarea:not(:placeholder-shown) {
     ~ label::after {
       position: absolute;
-      inset: $form-floating-padding-y ($form-floating-padding-x * .5);
+      inset: $form-floating-padding-y multiply($form-floating-padding-x, .5);
       z-index: -1;
       height: $form-floating-label-height;
       content: "";

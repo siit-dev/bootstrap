@@ -1,0 +1,72 @@
+// Runtime configuration for the standalone grid build.
+//
+// This entrypoint intentionally has no :root selector in Bootstrap 5. Root
+// overrides still work through var() inheritance, while fallback arguments
+// preserve a usable standalone file without requiring any token declarations.
+
+/*! Bootstrap runtime configuration */
+
+$runtime-grid-enable-runtime-values-fallback: $enable-runtime-values;
+$runtime-grid-spacer-fallback: $spacer;
+$runtime-grid-spacers-fallback: $spacers;
+$runtime-grid-gutters-fallback: $gutters;
+$runtime-grid-negative-spacers-fallback: $negative-spacers;
+$runtime-grid-container-max-widths-fallback: $container-max-widths;
+$runtime-grid-gutter-width-fallback: $grid-gutter-width;
+$runtime-grid-container-padding-x-fallback: $container-padding-x;
+$runtime-grid-utilities-fallback: $utilities;
+
+$utilities: ();
+@import "utilities";
+$utilities: map-get-multiple($utilities, $grid-utility-names);
+$runtime-grid-default-utilities-fallback: $utilities;
+$runtime-grid-custom-utilities: ();
+@each $name, $utility in $runtime-grid-utilities-fallback {
+  @if not map-has-key($runtime-grid-default-utilities-fallback, $name) or $utility != map-get($runtime-grid-default-utilities-fallback, $name) {
+    $runtime-grid-custom-utilities: map-merge($runtime-grid-custom-utilities, ($name: $utility));
+  }
+}
+$utilities: $runtime-grid-utilities-fallback;
+
+$enable-runtime-values: true !global;
+$spacer: var(--#{$prefix}spacer, #{$spacer});
+$grid-gutter-width: var(--#{$prefix}gutter-width, #{$runtime-grid-gutter-width-fallback});
+$container-padding-x: calc(var(--#{$prefix}gutter-width, #{$runtime-grid-gutter-width-fallback}) * .5);
+
+$runtime-grid-spacers: ();
+@each $key, $value in $runtime-grid-spacers-fallback {
+  $runtime-grid-spacers: map-merge(
+    $runtime-grid-spacers,
+    ($key: var(--#{$prefix}config-spacer-#{$key}, #{$value}))
+  );
+}
+$spacers: map-merge(
+  $runtime-grid-spacers,
+  (
+    0: 0,
+    1: calc(var(--#{$prefix}spacer, 1rem) * .25),
+    2: calc(var(--#{$prefix}spacer, 1rem) * .5),
+    3: var(--#{$prefix}spacer, 1rem),
+    4: calc(var(--#{$prefix}spacer, 1rem) * 1.5),
+    5: calc(var(--#{$prefix}spacer, 1rem) * 3)
+  )
+);
+
+$runtime-grid-gutters: ();
+@each $key, $value in $runtime-grid-gutters-fallback {
+  $runtime-grid-gutters: map-merge(
+    $runtime-grid-gutters,
+    ($key: var(--#{$prefix}config-gutter-#{$key}, #{$value}))
+  );
+}
+$gutters: map-merge($runtime-grid-gutters, $spacers);
+$negative-spacers: if($enable-negative-margins, negativify-map($spacers), null);
+
+$runtime-grid-container-max-widths: ();
+@each $breakpoint, $value in $runtime-grid-container-max-widths-fallback {
+  $runtime-grid-container-max-widths: map-merge(
+    $runtime-grid-container-max-widths,
+    ($breakpoint: var(--#{$prefix}config-container-max-width-#{$breakpoint}, #{$value}))
+  );
+}
+$container-max-widths: $runtime-grid-container-max-widths;

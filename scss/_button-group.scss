@@ -73,8 +73,8 @@
 //
 
 .dropdown-toggle-split {
-  padding-right: $btn-padding-x * .75;
-  padding-left: $btn-padding-x * .75;
+  padding-right: multiply($btn-padding-x, .75);
+  padding-left: multiply($btn-padding-x, .75);
 
   &::after,
   .dropup &::after,
@@ -88,13 +88,13 @@
 }
 
 .btn-sm + .dropdown-toggle-split {
-  padding-right: $btn-padding-x-sm * .75;
-  padding-left: $btn-padding-x-sm * .75;
+  padding-right: multiply($btn-padding-x-sm, .75);
+  padding-left: multiply($btn-padding-x-sm, .75);
 }
 
 .btn-lg + .dropdown-toggle-split {
-  padding-right: $btn-padding-x-lg * .75;
-  padding-left: $btn-padding-x-lg * .75;
+  padding-right: multiply($btn-padding-x-lg, .75);
+  padding-left: multiply($btn-padding-x-lg, .75);
 }
 
 
