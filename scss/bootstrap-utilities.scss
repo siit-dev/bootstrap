@@ -21,13 +21,14 @@
 @import "runtime-utilities";
 @import "runtime";
 
-@import "helpers";
+@supports #{$runtime-values-feature-query} {
+  @import "helpers";
 
-// Rebuild runtime defaults and merge consumer additions/overrides back in.
-// stylelint-disable-next-line scss/dollar-variable-default
-$utilities: $runtime-custom-utilities !global;
-@import "utilities";
-@import "utilities/api";
+  // Rebuild runtime defaults and merge consumer additions/overrides back in.
+  $utilities: $runtime-custom-utilities !global;
+  @import "utilities";
+  @import "utilities/api";
+}
 
 @import "runtime-restore";
 // stylelint-disable-next-line scss/dollar-variable-default

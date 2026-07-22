@@ -1,13 +1,18 @@
 // Re-emit only the selectors present in bootstrap-grid.css. Breakpoint
 // selection and utility names remain structural Sass.
 
-@import "containers";
-@import "grid";
+@supports #{$runtime-values-feature-query} {
+  @import "containers";
+  @import "grid";
 
-$utilities: $runtime-grid-custom-utilities;
-@import "utilities";
-$utilities: map-get-multiple($utilities, $grid-utility-names);
-@import "utilities/api";
+  // These assignments stay scoped to the feature-query block: the nested
+  // utilities import creates a block-local $utilities that the api import
+  // reads, and the restore assignments below reset the global afterwards.
+  $utilities: $runtime-grid-custom-utilities;
+  @import "utilities";
+  $utilities: map-get-multiple($utilities, $grid-utility-names);
+  @import "utilities/api";
+}
 
 $enable-runtime-values: $runtime-grid-enable-runtime-values-fallback !global;
 $spacer: $runtime-grid-spacer-fallback !global;

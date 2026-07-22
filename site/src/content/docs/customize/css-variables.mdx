@@ -40,7 +40,7 @@ For example, a Shopify theme can map its settings to three high-level inputs:
 
 Button hover and active colors, alerts, tables, links, color utilities, component spacing, and derived radii continue to reference those inputs. Mixed units are supported because arithmetic remains in native `calc()`, `min()`, `max()`, and `clamp()` expressions.
 
-The original 5.3.8 declarations remain earlier in the compiled stylesheet for source compatibility. The reactive declaration pass targets browsers with CSS custom properties, `color-mix()`, relative colors, and native CSS math; it does not depend on `contrast-color()` or a feature-query wrapper. In that path, `--bs-*-rgb` properties contain colors rather than comma-separated channels. Apply alpha with relative color syntax:
+The original 5.3.8 declarations remain earlier in the compiled stylesheet for source compatibility. The reactive declaration pass targets browsers with CSS custom properties, `color-mix()`, relative colors, and typed `calc()` arithmetic, and the whole pass — including the reactive custom-property graph — is wrapped in a single `@supports` feature query covering that full set. Browsers below the floor (for example iOS Safari before 18.2 or Chrome before typed arithmetic shipped) skip the reactive layer entirely and render the untouched Bootstrap 5.3.8 declarations; this matters because a `var()`-bearing declaration that fails substitution would otherwise unset the property instead of reviving the fallback. `contrast-color()` is not used. In the reactive path, `--bs-*-rgb` properties contain colors rather than comma-separated channels. Apply alpha with relative color syntax:
 
 ```css
 .example {

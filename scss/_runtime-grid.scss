@@ -29,9 +29,14 @@ $runtime-grid-custom-utilities: ();
 $utilities: $runtime-grid-utilities-fallback;
 
 $enable-runtime-values: true !global;
-$spacer: var(--#{$prefix}spacer, #{$spacer});
+$spacer: var(--#{$prefix}spacer, #{$runtime-grid-spacer-fallback});
 $grid-gutter-width: var(--#{$prefix}gutter-width, #{$runtime-grid-gutter-width-fallback});
-$container-padding-x: calc(var(--#{$prefix}gutter-width, #{$runtime-grid-gutter-width-fallback}) * .5);
+// Bootstrap 5 defaults $container-padding-x to the full $grid-gutter-width;
+// make-container() halves it when declaring --#{$prefix}gutter-x. Consumers
+// who decoupled the two keep their literal value.
+@if $runtime-grid-container-padding-x-fallback == $runtime-grid-gutter-width-fallback {
+  $container-padding-x: var(--#{$prefix}gutter-width, #{$runtime-grid-gutter-width-fallback});
+}
 
 $runtime-grid-spacers: ();
 @each $key, $value in $runtime-grid-spacers-fallback {
@@ -40,17 +45,30 @@ $runtime-grid-spacers: ();
     ($key: var(--#{$prefix}config-spacer-#{$key}, #{$value}))
   );
 }
-$spacers: map-merge(
-  $runtime-grid-spacers,
-  (
-    0: 0,
-    1: calc(var(--#{$prefix}spacer, 1rem) * .25),
-    2: calc(var(--#{$prefix}spacer, 1rem) * .5),
-    3: var(--#{$prefix}spacer, 1rem),
-    4: calc(var(--#{$prefix}spacer, 1rem) * 1.5),
-    5: calc(var(--#{$prefix}spacer, 1rem) * 3)
-  )
+// Re-derive the stock spacer scale from --#{$prefix}spacer only for entries a
+// consumer has not customized; customized entries keep their per-key token.
+$runtime-grid-derived-spacers: (
+  0: 0,
+  1: calc(var(--#{$prefix}spacer, #{$runtime-grid-spacer-fallback}) * .25),
+  2: calc(var(--#{$prefix}spacer, #{$runtime-grid-spacer-fallback}) * .5),
+  3: var(--#{$prefix}spacer, #{$runtime-grid-spacer-fallback}),
+  4: calc(var(--#{$prefix}spacer, #{$runtime-grid-spacer-fallback}) * 1.5),
+  5: calc(var(--#{$prefix}spacer, #{$runtime-grid-spacer-fallback}) * 3)
 );
+$runtime-grid-default-spacers: (
+  0: 0,
+  1: $runtime-grid-spacer-fallback * .25,
+  2: $runtime-grid-spacer-fallback * .5,
+  3: $runtime-grid-spacer-fallback,
+  4: $runtime-grid-spacer-fallback * 1.5,
+  5: $runtime-grid-spacer-fallback * 3
+);
+$spacers: $runtime-grid-spacers;
+@each $key, $value in $runtime-grid-derived-spacers {
+  @if map-has-key($runtime-grid-spacers-fallback, $key) and map-get($runtime-grid-spacers-fallback, $key) == map-get($runtime-grid-default-spacers, $key) {
+    $spacers: map-merge($spacers, ($key: $value));
+  }
+}
 
 $runtime-grid-gutters: ();
 @each $key, $value in $runtime-grid-gutters-fallback {
@@ -59,7 +77,9 @@ $runtime-grid-gutters: ();
     ($key: var(--#{$prefix}config-gutter-#{$key}, #{$value}))
   );
 }
-$gutters: map-merge($runtime-grid-gutters, $spacers);
+// Stock Bootstrap aliases $gutters to $spacers; only inherit the spacer scale
+// when a consumer has not decoupled the two maps.
+$gutters: if($runtime-grid-gutters-fallback == $runtime-grid-spacers-fallback, $spacers, $runtime-grid-gutters);
 $negative-spacers: if($enable-negative-margins, negativify-map($spacers), null);
 
 $runtime-grid-container-max-widths: ();

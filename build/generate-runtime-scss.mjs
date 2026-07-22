@@ -565,22 +565,32 @@ const runtimeLightCandidates = lightCandidates.map(entry => [...entry, convertEx
 const runtimeDarkCandidates = darkCandidates.map(entry => [...entry, convertExpression(entry[1].expression)])
 const runtimeModeCandidates = runtimeLightCandidates.filter(([name]) => !publicAliases.has(name))
 
+// Emit `#{...}` without dropping the quotes of quoted Sass strings, so an
+// override like `$breadcrumb-divider: quote(">")` survives the fallback path.
+function interpolation(name) {
+  return `#{if(type-of($${name}) == "string", inspect($${name}), $${name})}`
+}
+
 function declarationLines(entries, fallback = false, indentation = 4) {
   return entries.map(([name, declaration, converted]) => {
     const indent = ' '.repeat(indentation)
     const property = publicAliases.get(name) || `config-${name}`
 
     if (fallback) {
-      return `${indent}--#{$prefix}${property}: #{$${name}};`
+      return `${indent}--#{$prefix}${property}: ${interpolation(name)};`
     }
 
     const childIndent = ' '.repeat(indentation + 2)
 
+    // Both comparison operands are parenthesized: `==` binds tighter than
+    // space- or comma-list construction in SassScript, so an unparenthesized
+    // `@if $x == 0 .5rem 1rem red` would parse as the always-truthy list
+    // `(($x == 0) .5rem 1rem red)` and silently revert list-valued overrides.
     return [
-      `${indent}@if $${name} == ${declaration.expression} {`,
+      `${indent}@if ($${name}) == (${declaration.expression}) {`,
       `${childIndent}--#{$prefix}${property}: ${converted};`,
       `${indent}} @else {`,
-      `${childIndent}--#{$prefix}${property}: #{$${name}};`,
+      `${childIndent}--#{$prefix}${property}: ${interpolation(name)};`,
       `${indent}}`
     ].join('\n')
   })
@@ -636,6 +646,10 @@ const output = [
   '// Edit _variables.scss/_variables-dark.scss or the generator, then run:',
   '// npm run css-runtime-generate',
   '',
+  '// The quote-preserving if()/inspect() interpolation below is intentional;',
+  '// the linter cannot see through the wrapper to the interpolated variable.',
+  '// stylelint-disable scss/dollar-variable-no-missing-interpolation',
+  '',
   '/*! Bootstrap runtime configuration */',
   '// Progressive fallback tokens: exact Bootstrap 5.3.8 Sass values.',
   ':root,',
@@ -670,6 +684,11 @@ const output = [
   '',
   '// Reactive dependency graph. This build targets browsers with custom',
   '// properties, color-mix(), relative colors, and native CSS math.',
+  '// The feature query gates the whole reactive layer: without it, a browser',
+  '// with partial support would let these custom-property declarations win the',
+  '// cascade and then fail substitution at computed-value time, unsetting',
+  '// properties instead of reviving the fallback tokens above.',
+  '@supports #{$runtime-values-feature-query} {',
   ':root,',
   '[data-bs-theme="light"] {',
   ...declarationLines(runtimeLightCandidates),
@@ -718,6 +737,7 @@ const output = [
   '    --#{$prefix}link-hover-color-rgb: rgb(from var(--#{$prefix}link-hover-color) r g b);',
   '  }',
   '}',
+  '}',
   '',
   '// Components compiled after this file consume the runtime graph.',
   '$runtime-enable-runtime-values-fallback: $enable-runtime-values;',
@@ -725,6 +745,19 @@ const output = [
   ...runtimeMapNames.map(name => `$runtime-map-fallback-${name}: $${name};`),
   '',
   '$runtime-table-bg-scale-is-negative: $table-bg-scale < 0;',
+  '// Literal contrast candidates, captured before reassignment so the stock',
+  '// color-contrast() algorithm keeps working for literal backgrounds (for',
+  '// example a consumer-customized $table-variants entry) in the second pass.',
+  '$runtime-literal-color-contrast-light: $color-contrast-light;',
+  '$runtime-literal-color-contrast-dark: $color-contrast-dark;',
+  '$runtime-literal-white: $white;',
+  '$runtime-literal-black: $black;',
+  '// Stock focus-shadow expressions, captured before reassignment so the',
+  '// validation-state guards can detect consumer overrides.',
+  '$runtime-stock-focus-shadows: (',
+  '  "valid": 0 0 $input-btn-focus-blur $input-focus-width rgba(var(--#{$prefix}success-rgb), $input-btn-focus-color-opacity),',
+  '  "invalid": 0 0 $input-btn-focus-blur $input-focus-width rgba(var(--#{$prefix}danger-rgb), $input-btn-focus-color-opacity)',
+  ');',
   '$runtime-display-font-sizes-fallback: $display-font-sizes;',
   '$runtime-font-sizes-fallback: $font-sizes;',
   '$runtime-container-max-widths-fallback: $container-max-widths;',
@@ -744,19 +777,19 @@ const output = [
   '}',
   '$theme-colors: $runtime-theme-colors;',
   '$theme-colors-rgb: $theme-colors;',
-  '$table-variants: map-merge(',
-  '  $table-variants,',
-  '  (',
-  '    "primary": mix-color(if($runtime-table-bg-scale-is-negative, white, black), $primary, if($runtime-table-bg-scale-is-negative, calc(-1 * $table-bg-scale), $table-bg-scale)),',
-  '    "secondary": mix-color(if($runtime-table-bg-scale-is-negative, white, black), $secondary, if($runtime-table-bg-scale-is-negative, calc(-1 * $table-bg-scale), $table-bg-scale)),',
-  '    "success": mix-color(if($runtime-table-bg-scale-is-negative, white, black), $success, if($runtime-table-bg-scale-is-negative, calc(-1 * $table-bg-scale), $table-bg-scale)),',
-  '    "info": mix-color(if($runtime-table-bg-scale-is-negative, white, black), $info, if($runtime-table-bg-scale-is-negative, calc(-1 * $table-bg-scale), $table-bg-scale)),',
-  '    "warning": mix-color(if($runtime-table-bg-scale-is-negative, white, black), $warning, if($runtime-table-bg-scale-is-negative, calc(-1 * $table-bg-scale), $table-bg-scale)),',
-  '    "danger": mix-color(if($runtime-table-bg-scale-is-negative, white, black), $danger, if($runtime-table-bg-scale-is-negative, calc(-1 * $table-bg-scale), $table-bg-scale)),',
-  '    "light": $light,',
-  '    "dark": $dark',
-  '  )',
-  ');',
+  '// Runtime table variants apply per entry, and only where the consumer kept',
+  '// the stock derivation; customized entries keep their compiled value.',
+  '@each $runtime-key, $runtime-source in ("primary": $primary, "secondary": $secondary, "success": $success, "info": $info, "warning": $warning, "danger": $danger) {',
+  '  @if map-get($runtime-map-fallback-table-variants, $runtime-key) == shift-color(map-get(("primary": $runtime-config-fallback-primary, "secondary": $runtime-config-fallback-secondary, "success": $runtime-config-fallback-success, "info": $runtime-config-fallback-info, "warning": $runtime-config-fallback-warning, "danger": $runtime-config-fallback-danger), $runtime-key), $runtime-config-fallback-table-bg-scale) {',
+  '    $table-variants: map-merge($table-variants, ($runtime-key: mix-color(if($runtime-table-bg-scale-is-negative, white, black), $runtime-source, if($runtime-table-bg-scale-is-negative, calc(-1 * $table-bg-scale), $table-bg-scale))));',
+  '  }',
+  '}',
+  '@if map-get($runtime-map-fallback-table-variants, "light") == $runtime-config-fallback-light {',
+  '  $table-variants: map-merge($table-variants, ("light": $light));',
+  '}',
+  '@if map-get($runtime-map-fallback-table-variants, "dark") == $runtime-config-fallback-dark {',
+  '  $table-variants: map-merge($table-variants, ("dark": $dark));',
+  '}',
   '$utilities-colors: $theme-colors-rgb;',
   '$utilities-text: map-merge(',
   '  $utilities-colors,',
@@ -785,23 +818,19 @@ const output = [
   ');',
   '$utilities-border-colors: map-loop($utilities-border, rgba-css-var, "$key", "border");',
   '$utilities-links-underline: map-loop($utilities-colors, rgba-css-var, "$key", "link-underline");',
-  '$form-validation-states: map-merge(',
-  '  $form-validation-states,',
-  '  (',
-  '    "valid": map-merge(',
-  '      map-get($form-validation-states, "valid"),',
-  '      (',
-  '        "focus-box-shadow": 0 0 $input-btn-focus-blur $input-focus-width rgba-css-rgb-var("success", $input-btn-focus-color-opacity)',
-  '      )',
-  '    ),',
-  '    "invalid": map-merge(',
-  '      map-get($form-validation-states, "invalid"),',
-  '      (',
-  '        "focus-box-shadow": 0 0 $input-btn-focus-blur $input-focus-width rgba-css-rgb-var("danger", $input-btn-focus-color-opacity)',
-  '      )',
-  '    )',
-  '  )',
-  ');',
+  '// Runtime validation focus shadows apply only when the consumer kept the',
+  '// stock channel-list expression, which the runtime -rgb colors invalidate.',
+  '@each $runtime-state, $runtime-state-color in ("valid": "success", "invalid": "danger") {',
+  '  @if map-has-key($runtime-map-fallback-form-validation-states, $runtime-state) and map-get(map-get($runtime-map-fallback-form-validation-states, $runtime-state), "focus-box-shadow") == map-get($runtime-stock-focus-shadows, $runtime-state) {',
+  '    $form-validation-states: map-merge(',
+  '      $form-validation-states,',
+  '      ($runtime-state: map-merge(',
+  '        map-get($form-validation-states, $runtime-state),',
+  '        ("focus-box-shadow": 0 0 $input-btn-focus-blur $input-focus-width rgba-css-rgb-var($runtime-state-color, $input-btn-focus-color-opacity))',
+  '      ))',
+  '    );',
+  '  }',
+  '}',
   '$runtime-display-font-sizes: ();',
   '@each $display, $value in $runtime-display-font-sizes-fallback {',
   '  $runtime-display-font-sizes: map-merge(',
@@ -833,14 +862,30 @@ const output = [
   '    ($key: var(--#{$prefix}config-spacer-#{$key}, #{$value}))',
   '  );',
   '}',
-  '$spacers: map-merge($runtime-spacers, (',
+  '// Re-derive the stock spacer scale from --#{$prefix}spacer only for entries',
+  '// a consumer has not customized; customized entries keep their per-key token.',
+  '$runtime-derived-spacers: (',
   '  0: 0,',
   '  1: calc(var(--#{$prefix}spacer) * .25),',
   '  2: calc(var(--#{$prefix}spacer) * .5),',
   '  3: var(--#{$prefix}spacer),',
   '  4: calc(var(--#{$prefix}spacer) * 1.5),',
   '  5: calc(var(--#{$prefix}spacer) * 3)',
-  '));',
+  ');',
+  '$runtime-default-spacers: (',
+  '  0: 0,',
+  '  1: $runtime-config-fallback-spacer * .25,',
+  '  2: $runtime-config-fallback-spacer * .5,',
+  '  3: $runtime-config-fallback-spacer,',
+  '  4: $runtime-config-fallback-spacer * 1.5,',
+  '  5: $runtime-config-fallback-spacer * 3',
+  ');',
+  '$spacers: $runtime-spacers;',
+  '@each $key, $value in $runtime-derived-spacers {',
+  '  @if map-has-key($runtime-spacers-fallback, $key) and map-get($runtime-spacers-fallback, $key) == map-get($runtime-default-spacers, $key) {',
+  '    $spacers: map-merge($spacers, ($key: $value));',
+  '  }',
+  '}',
   '$runtime-gutters: ();',
   '@each $key, $value in $runtime-gutters-fallback {',
   '  $runtime-gutters: map-merge(',
@@ -848,7 +893,9 @@ const output = [
   '    ($key: var(--#{$prefix}config-gutter-#{$key}, #{$value}))',
   '  );',
   '}',
-  '$gutters: map-merge($runtime-gutters, $spacers);',
+  '// Stock Bootstrap aliases $gutters to $spacers; only inherit the spacer',
+  '// scale when a consumer has not decoupled the two maps.',
+  '$gutters: if($runtime-gutters-fallback == $runtime-spacers-fallback, $spacers, $runtime-gutters);',
   '$negative-spacers: if($enable-negative-margins, negativify-map($spacers), null);',
   ''
 ].join('\n')

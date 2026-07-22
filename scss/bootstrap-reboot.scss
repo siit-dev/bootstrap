@@ -11,5 +11,7 @@
 
 @import "runtime";
 
-@import "reboot";
+@supports #{$runtime-values-feature-query} {
+  @import "reboot";
+}
 @import "runtime-restore";

@@ -6,6 +6,17 @@
 // default false preserves the exact Bootstrap 5 output for existing imports.
 $enable-runtime-values: false !default;
 
+// Feature query wrapped around every reactive declaration. A browser must
+// support the complete feature set the runtime graph emits — color-mix(),
+// relative colors (including round() on channels and color(from … xyz-d65 …)),
+// and typed calc() arithmetic (length÷length and percentage÷percentage
+// division) — before any second-pass declaration may win the cascade.
+// Without this gate, a browser implementing relative colors but not typed
+// arithmetic (for example iOS Safari 16.4–18.1 or Chrome 119–139) would let
+// runtime declarations win and then invalidate them at computed-value time,
+// unsetting properties instead of reviving the stock fallback declarations.
+$runtime-values-feature-query: "(color: color-mix(in srgb, red 50%, blue)) and (color: rgb(from red round(calc(r + .01)) g b / alpha)) and (color: color(from red xyz-d65 calc(y * .9504559271) y calc(y * 1.0890577508))) and (width: calc(100vw / 1200px * 1%)) and (opacity: calc(1% / 100%))" !default;
+
 // Ascending
 // Used to evaluate Sass maps like our grid breakpoints.
 @mixin _assert-ascending($map, $map-name) {
@@ -275,6 +286,18 @@ $_luminance-list: .0008 .001 .0011 .0013 .0015 .0017 .002 .0022 .0025 .0027 .003
   }
 
   $foregrounds: $color-contrast-light, $color-contrast-dark, $white, $black;
+
+  // During the second declaration pass the standard foreground candidates are
+  // runtime var() expressions. Substitute their captured literal values so a
+  // literal background (for example a consumer-customized $table-variants
+  // entry) keeps compiling through the stock algorithm.
+  @if $enable-runtime-values and variable-exists("runtime-literal-white") {
+    $foregrounds: if(is-css-runtime-value($color-contrast-light), $runtime-literal-color-contrast-light, $color-contrast-light),
+      if(is-css-runtime-value($color-contrast-dark), $runtime-literal-color-contrast-dark, $color-contrast-dark),
+      if(is-css-runtime-value($white), $runtime-literal-white, $white),
+      if(is-css-runtime-value($black), $runtime-literal-black, $black);
+  }
+
   $max-ratio: 0;
   $max-ratio-color: null;
 
@@ -361,7 +384,19 @@ $_luminance-list: .0008 .001 .0011 .0013 .0015 .0017 .002 .0022 .0025 .0027 .003
 
 // Shift links away from their selected contrast foreground. This is the
 // browser-side equivalent of Bootstrap's shade-for-dark/tint-for-light branch.
-@function contrast-shift-color($color, $shade-weight, $tint-weight: $shade-weight) {
+// `$reference-color` mirrors the `$color == $color-contrast-light` condition in
+// Bootstrap 5's mixin defaults: when a caller supplies an explicit literal
+// foreground (for example `button-variant($orange, $orange, $color: $white)`),
+// the shade/tint branch must follow that foreground, not a recomputed contrast.
+@function contrast-shift-color($color, $shade-weight, $tint-weight: $shade-weight, $reference-color: null) {
+  @if $reference-color != null and not is-css-runtime-value($reference-color) {
+    @return if(
+      $reference-color == $color-contrast-light,
+      shade-color($color, $shade-weight),
+      tint-color($color, $tint-weight)
+    );
+  }
+
   @if is-css-runtime-value($color) {
     $opposite-contrast: css-native-function(
       "rgb",

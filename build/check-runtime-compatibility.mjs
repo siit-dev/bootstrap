@@ -216,9 +216,47 @@ if (
 const runtimeSource = fs.readFileSync(path.join(root, 'scss', '_runtime.scss'), 'utf8')
 if (
   runtimeSource.includes('contrast-color(') ||
-  /@supports[^{]+(?:color-mix|rgb\(from)/.test(runtimeSource)
+  !runtimeSource.includes('@supports #{$runtime-values-feature-query}')
 ) {
-  failures.push('The runtime graph still depends on contrast-color() or a feature-query wrapper')
+  failures.push('The runtime graph must avoid contrast-color() and gate reactive declarations behind $runtime-values-feature-query')
+}
+
+// List- and map-valued overrides must survive the runtime pass: unparenthesized
+// list guards and unguarded map merges silently reverted them.
+const overridePreservationCss = sass.compileString(
+  '$box-shadow: 0 0 5px red; $btn-transition: none;' +
+  ' $spacers: (0: 0, 1: .5rem, 2: 1rem, 3: 2rem, 4: 3rem, 5: 4rem);' +
+  ' $table-variants: ("primary": #123456, "custom": #654321); @import "bootstrap";',
+  {
+    loadPaths: [path.join(root, 'scss')]
+  }
+).css
+const overrideRuntime = overridePreservationCss.split('/*! Bootstrap runtime configuration */')[1] || ''
+
+if (
+  overrideRuntime.includes('--bs-box-shadow: 0 0.5rem 1rem rgb(from') ||
+  !overrideRuntime.includes('--bs-box-shadow: 0 0 5px red') ||
+  !overrideRuntime.includes('--bs-config-btn-transition: none') ||
+  overrideRuntime.includes('margin-top: calc(var(--bs-spacer) * 0.25) !important') ||
+  !overrideRuntime.includes('margin-top: var(--bs-config-spacer-1, 0.5rem) !important') ||
+  !overrideRuntime.includes('--bs-table-bg: #123456') ||
+  !overrideRuntime.includes('.table-custom')
+) {
+  failures.push('A list- or map-valued Sass override was not preserved by the runtime pass')
+}
+
+// The standalone grid's second pass must keep Bootstrap's full container
+// padding ($container-padding-x is the full gutter; make-container halves it).
+const gridCss = sass.compileString('@import "bootstrap-grid";', {
+  loadPaths: [path.join(root, 'scss')]
+}).css
+const gridRuntime = gridCss.split('/*! Bootstrap runtime configuration */')[1] || ''
+
+if (
+  !gridRuntime.includes('--bs-gutter-x: var(--bs-gutter-width, 1.5rem)') ||
+  gridRuntime.includes('--bs-gutter-x: calc(var(--bs-gutter-width, 1.5rem) * 0.5)')
+) {
+  failures.push('The standalone grid runtime pass must keep full container padding')
 }
 
 if (failures.length) {

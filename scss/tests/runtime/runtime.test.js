@@ -5,6 +5,7 @@
 describe('Bootstrap runtime CSS dependency graph', () => {
   let fixture
   let overrides
+  let transitionNeutralizer
 
   const supportsRuntime = CSS.supports('color', 'color-mix(in srgb, red, blue)') &&
     CSS.supports('color', 'rgb(from red r g b)')
@@ -48,6 +49,14 @@ describe('Bootstrap runtime CSS dependency graph', () => {
     // Karma serves CSS links from the body, so append the theme after them to
     // model a Shopify theme stylesheet loaded after Bootstrap.
     document.body.append(overrides)
+
+    // Reading a computed style before an override establishes a before-change
+    // style, so Bootstrap's own transitions (e.g. `background-color .15s` on
+    // .btn) would otherwise report the transition's starting value when these
+    // specs assert synchronously after an override.
+    transitionNeutralizer = document.createElement('style')
+    transitionNeutralizer.textContent = '* { transition: none !important; }'
+    document.body.append(transitionNeutralizer)
   })
 
   afterEach(() => {
@@ -57,6 +66,7 @@ describe('Bootstrap runtime CSS dependency graph', () => {
     document.documentElement.style.removeProperty('--bs-config-h1-font-size')
     fixture.remove()
     overrides.remove()
+    transitionNeutralizer.remove()
   })
 
   it('keeps stock rendering before overrides', () => {
@@ -137,7 +147,7 @@ describe('Bootstrap runtime CSS dependency graph', () => {
     expect(computed('.runtime-fs', 'font-size')).not.toBe(utilityBefore)
   })
 
-  it('keeps source-compatible channel declarations without a contrast feature gate', () => {
+  it('keeps source-compatible channel declarations and gates the reactive layer', () => {
     const sheets = [...document.styleSheets]
     const bootstrapSheet = sheets.find(sheet => {
       return [...sheet.cssRules].some(rule => rule.cssText.includes('--bs-blue:'))
@@ -147,5 +157,12 @@ describe('Bootstrap runtime CSS dependency graph', () => {
     expect(css).toContain('--bs-primary-rgb: 13, 110, 253')
     expect(css).toContain('rgb(from var(--bs-primary)')
     expect(css).not.toContain('contrast-color(')
+
+    // Reactive declarations must sit behind the runtime feature query so
+    // partially supporting browsers keep the stock fallback declarations.
+    const supportsRules = [...bootstrapSheet.cssRules].filter(rule => rule instanceof CSSSupportsRule)
+    expect(supportsRules.length).toBeGreaterThan(0)
+    const gated = supportsRules.map(rule => rule.cssText).join('\n')
+    expect(gated).toContain('rgb(from var(--bs-primary)')
   })
 })

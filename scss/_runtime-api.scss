@@ -3,44 +3,53 @@
 // Bootstrap's regular component output above this import is the exact
 // progressive fallback. The second declaration pass targets browsers with
 // custom properties, color-mix(), relative colors, and native CSS math.
+//
+// The whole pass sits behind $runtime-values-feature-query: a declaration
+// containing var() always wins the cascade and, when substitution fails, is
+// invalidated at computed-value time instead of reviving the fallback
+// declaration. Gating on the full emitted feature set keeps browsers with
+// partial support (relative colors without typed calc() arithmetic) on the
+// untouched Bootstrap 5 fallback output.
 
-@import "reboot";
-@import "type";
-@import "images";
-@import "containers";
-@import "grid";
-@import "tables";
-@import "forms";
-@import "buttons";
-@import "transitions";
-@import "dropdown";
-@import "button-group";
-@import "nav";
-@import "navbar";
-@import "card";
-@import "accordion";
-@import "breadcrumb";
-@import "pagination";
-@import "badge";
-@import "alert";
-@import "progress";
-@import "list-group";
-@import "close";
-@import "toasts";
-@import "modal";
-@import "tooltip";
-@import "popover";
-@import "carousel";
-@import "spinners";
-@import "offcanvas";
-@import "placeholders";
+@supports #{$runtime-values-feature-query} {
+  @import "reboot";
+  @import "type";
+  @import "images";
+  @import "containers";
+  @import "grid";
+  @import "tables";
+  @import "forms";
+  @import "buttons";
+  @import "transitions";
+  @import "dropdown";
+  @import "button-group";
+  @import "nav";
+  @import "navbar";
+  @import "card";
+  @import "accordion";
+  @import "breadcrumb";
+  @import "pagination";
+  @import "badge";
+  @import "alert";
+  @import "progress";
+  @import "list-group";
+  @import "close";
+  @import "toasts";
+  @import "modal";
+  @import "tooltip";
+  @import "popover";
+  @import "carousel";
+  @import "spinners";
+  @import "offcanvas";
+  @import "placeholders";
 
-@import "helpers";
+  @import "helpers";
 
-// Rebuild runtime defaults and merge consumer additions/overrides back in.
-$utilities: $runtime-custom-utilities !global;
-@import "utilities";
-@import "utilities/api";
+  // Rebuild runtime defaults and merge consumer additions/overrides back in.
+  $utilities: $runtime-custom-utilities !global;
+  @import "utilities";
+  @import "utilities/api";
+}
 
 @import "runtime-restore";
 $utilities: $runtime-map-fallback-utilities !global;
