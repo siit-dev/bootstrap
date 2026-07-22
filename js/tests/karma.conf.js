@@ -69,7 +69,7 @@ const config = {
       watched: false
     },
     {
-      pattern: 'js/tests/unit/**/!(jquery).spec.js',
+      pattern: 'js/tests/unit/**/!(jquery|reactive-css).spec.js',
       watched: !BROWSERSTACK
     }
   ],
