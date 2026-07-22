@@ -1,10 +1,11 @@
 {
-  "name": "bootstrap",
-  "description": "The most popular front-end framework for developing responsive, mobile first projects on the web.",
-  "version": "5.3.8",
+  "name": "@smartimpact-it/bootstrap",
+  "description": "Smart Impact's Bootstrap distribution with Shopify-oriented reactive runtime tokens.",
+  "version": "5.3.8-smartimpact.1",
   "config": {
     "version_short": "5.3"
   },
+  "bootstrapVersion": "5.3.8",
   "keywords": [
     "css",
     "sass",
@@ -14,15 +15,19 @@
     "framework",
     "web"
   ],
-  "homepage": "https://getbootstrap.com/",
+  "homepage": "https://github.com/siit-dev/bootstrap",
   "author": "The Bootstrap Authors (https://github.com/twbs/bootstrap/graphs/contributors)",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/twbs/bootstrap.git"
+    "url": "git+https://github.com/siit-dev/bootstrap.git"
   },
   "bugs": {
-    "url": "https://github.com/twbs/bootstrap/issues"
+    "url": "https://github.com/siit-dev/bootstrap/issues"
   },
   "funding": [
     {
@@ -76,7 +81,7 @@
     "js-test-jquery": "cross-env JQUERY=true npm run js-test-karma",
     "lint": "npm-run-all --aggregate-output --continue-on-error --parallel js-lint css-lint lockfile-lint",
     "docs": "npm-run-all docs-build docs-lint",
-    "docs-build": "npm run astro-build",
+    "docs-build": "npm-run-all dist astro-build",
     "docs-compile": "npm run docs-build",
     "docs-vnu": "node build/vnu-jar.mjs",
     "docs-lint": "npm-run-all docs-prettier-check docs-vnu",
@@ -86,13 +91,16 @@
     "docs-serve-only": "npx sirv-cli _site --port 9001",
     "lockfile-lint": "lockfile-lint --allowed-hosts npm --allowed-schemes https: --empty-hostname false --type npm --path package-lock.json",
     "update-deps": "ncu -u",
-    "release": "npm-run-all dist release-sri docs-build release-zip*",
+    "release": "npm run release-check",
+    "release-check": "npm-run-all test bundlewatch package-check",
     "release-sri": "node build/generate-sri.mjs",
-    "release-version": "node build/change-version.mjs",
-    "release-zip": "cross-env-shell \"rm -rf bootstrap-$npm_package_version-dist bootstrap-$npm_package_version-dist.zip && cp -r dist/ bootstrap-$npm_package_version-dist && zip -qr9 bootstrap-$npm_package_version-dist.zip bootstrap-$npm_package_version-dist && rm -rf bootstrap-$npm_package_version-dist\"",
-    "release-zip-examples": "node build/zip-examples.mjs",
-    "dist": "npm-run-all --aggregate-output --parallel css js",
-    "test": "npm-run-all lint dist js-test docs-build docs-lint",
+    "release-version": "node build/change-package-version.mjs",
+    "package-check": "node build/validate-package.mjs",
+    "clean-dist": "node build/clean-dist.mjs",
+    "dist-build": "npm-run-all --aggregate-output --parallel css js",
+    "dist": "npm-run-all clean-dist dist-build",
+    "prepack": "npm run dist",
+    "test": "npm-run-all lint dist js-test astro-build docs-lint",
     "netlify": "npm-run-all dist release-sri astro-build",
     "watch": "npm-run-all --parallel watch-*",
     "watch-css-main": "nodemon --watch scss/ --ext scss --exec \"npm-run-all css-lint css-compile css-prefix\"",

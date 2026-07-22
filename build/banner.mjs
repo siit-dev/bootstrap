@@ -12,6 +12,7 @@ const year = new Date().getFullYear()
 function getBanner(pluginFilename) {
   return `/*!
   * Bootstrap${pluginFilename ? ` ${pluginFilename}` : ''} v${pkg.version} (${pkg.homepage})
+  * Based on Bootstrap v${pkg.bootstrapVersion} (https://getbootstrap.com/)
   * Copyright 2011-${year} ${pkg.author}
   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
   */`
