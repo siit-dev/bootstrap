@@ -1,0 +1,32 @@
+{% doc %}
+  Maps a Shopify color_palette to Bootstrap's runtime source contract.
+
+  The brightness choice is a convenient black/white default. Review the final
+  pairs against the theme's accessibility requirements.
+{% enddoc %}
+
+{% liquid
+  assign bootstrap_color_names = 'primary,secondary,success,warning,danger' | split: ','
+%}
+
+{% style %}
+  :root {
+    --bs-black: {{ settings.color_palette.black }};
+    --bs-white: {{ settings.color_palette.white }};
+
+    {% for color_name in bootstrap_color_names %}
+      {% liquid
+        assign palette_color = settings.color_palette[color_name]
+        assign palette_color_brightness = palette_color | color_brightness
+        assign contrast_color = settings.color_palette.white
+
+        if palette_color_brightness > 128
+          assign contrast_color = settings.color_palette.black
+        endif
+      %}
+      --bs-{{ color_name }}: {{ palette_color }};
+      --bs-{{ color_name }}-rgb: {{ palette_color.red }}, {{ palette_color.green }}, {{ palette_color.blue }};
+      --bs-{{ color_name }}-contrast: {{ contrast_color }};
+    {% endfor %}
+  }
+{% endstyle %}

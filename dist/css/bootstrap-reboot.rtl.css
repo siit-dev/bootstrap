@@ -1,6 +1,6 @@
 /*!
  * Bootstrap Reboot v5.3.8 (https://getbootstrap.com/)
- * Copyright 2011-2025 The Bootstrap Authors
+ * Copyright 2011-2026 The Bootstrap Authors
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
  */
 :root,
@@ -29,13 +29,21 @@
   --bs-gray-800: #343a40;
   --bs-gray-900: #212529;
   --bs-primary: #0d6efd;
+  --bs-primary-contrast: #fff;
   --bs-secondary: #6c757d;
+  --bs-secondary-contrast: #fff;
   --bs-success: #198754;
+  --bs-success-contrast: #fff;
   --bs-info: #0dcaf0;
+  --bs-info-contrast: #000;
   --bs-warning: #ffc107;
+  --bs-warning-contrast: #000;
   --bs-danger: #dc3545;
+  --bs-danger-contrast: #fff;
   --bs-light: #f8f9fa;
+  --bs-light-contrast: #000;
   --bs-dark: #212529;
+  --bs-dark-contrast: #fff;
   --bs-primary-rgb: 13, 110, 253;
   --bs-secondary-rgb: 108, 117, 125;
   --bs-success-rgb: 25, 135, 84;
@@ -44,35 +52,18 @@
   --bs-danger-rgb: 220, 53, 69;
   --bs-light-rgb: 248, 249, 250;
   --bs-dark-rgb: 33, 37, 41;
-  --bs-primary-text-emphasis: #052c65;
-  --bs-secondary-text-emphasis: #2b2f32;
-  --bs-success-text-emphasis: #0a3622;
-  --bs-info-text-emphasis: #055160;
-  --bs-warning-text-emphasis: #664d03;
-  --bs-danger-text-emphasis: #58151c;
   --bs-light-text-emphasis: #495057;
-  --bs-dark-text-emphasis: #495057;
-  --bs-primary-bg-subtle: #cfe2ff;
-  --bs-secondary-bg-subtle: #e2e3e5;
-  --bs-success-bg-subtle: #d1e7dd;
-  --bs-info-bg-subtle: #cff4fc;
-  --bs-warning-bg-subtle: #fff3cd;
-  --bs-danger-bg-subtle: #f8d7da;
   --bs-light-bg-subtle: #fcfcfd;
-  --bs-dark-bg-subtle: #ced4da;
-  --bs-primary-border-subtle: #9ec5fe;
-  --bs-secondary-border-subtle: #c4c8cb;
-  --bs-success-border-subtle: #a3cfbb;
-  --bs-info-border-subtle: #9eeaf9;
-  --bs-warning-border-subtle: #ffe69c;
-  --bs-danger-border-subtle: #f1aeb5;
   --bs-light-border-subtle: #e9ecef;
+  --bs-dark-text-emphasis: #495057;
+  --bs-dark-bg-subtle: #ced4da;
   --bs-dark-border-subtle: #adb5bd;
   --bs-white-rgb: 255, 255, 255;
   --bs-black-rgb: 0, 0, 0;
   --bs-font-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --bs-font-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --bs-gradient: linear-gradient(180deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0));
+  --bs-spacer: 1rem;
   --bs-body-font-family: var(--bs-font-sans-serif);
   --bs-body-font-size: 1rem;
   --bs-body-font-weight: 400;
@@ -83,11 +74,9 @@
   --bs-body-bg-rgb: 255, 255, 255;
   --bs-emphasis-color: #000;
   --bs-emphasis-color-rgb: 0, 0, 0;
-  --bs-secondary-color: rgba(33, 37, 41, 0.75);
   --bs-secondary-color-rgb: 33, 37, 41;
   --bs-secondary-bg: #e9ecef;
   --bs-secondary-bg-rgb: 233, 236, 239;
-  --bs-tertiary-color: rgba(33, 37, 41, 0.5);
   --bs-tertiary-color-rgb: 33, 37, 41;
   --bs-tertiary-bg: #f8f9fa;
   --bs-tertiary-bg-rgb: 248, 249, 250;
@@ -95,7 +84,6 @@
   --bs-link-color: #0d6efd;
   --bs-link-color-rgb: 13, 110, 253;
   --bs-link-decoration: underline;
-  --bs-link-hover-color: #0a58ca;
   --bs-link-hover-color-rgb: 10, 88, 202;
   --bs-code-color: #d63384;
   --bs-highlight-color: #212529;
@@ -117,11 +105,32 @@
   --bs-box-shadow-inset: inset 0 1px 2px rgba(0, 0, 0, 0.075);
   --bs-focus-ring-width: 0.25rem;
   --bs-focus-ring-opacity: 0.25;
-  --bs-focus-ring-color: rgba(13, 110, 253, 0.25);
-  --bs-form-valid-color: #198754;
-  --bs-form-valid-border-color: #198754;
-  --bs-form-invalid-color: #dc3545;
-  --bs-form-invalid-border-color: #dc3545;
+  --bs-form-valid-color: var(--bs-success);
+  --bs-form-valid-border-color: var(--bs-success);
+  --bs-form-invalid-color: var(--bs-danger);
+  --bs-form-invalid-border-color: var(--bs-danger);
+  --bs-primary-text-emphasis: color-mix(in srgb, var(--bs-primary), var(--bs-black) 60%);
+  --bs-primary-bg-subtle: color-mix(in srgb, var(--bs-primary), var(--bs-white) 80%);
+  --bs-primary-border-subtle: color-mix(in srgb, var(--bs-primary), var(--bs-white) 60%);
+  --bs-secondary-text-emphasis: color-mix(in srgb, var(--bs-secondary), var(--bs-black) 60%);
+  --bs-secondary-bg-subtle: color-mix(in srgb, var(--bs-secondary), var(--bs-white) 80%);
+  --bs-secondary-border-subtle: color-mix(in srgb, var(--bs-secondary), var(--bs-white) 60%);
+  --bs-success-text-emphasis: color-mix(in srgb, var(--bs-success), var(--bs-black) 60%);
+  --bs-success-bg-subtle: color-mix(in srgb, var(--bs-success), var(--bs-white) 80%);
+  --bs-success-border-subtle: color-mix(in srgb, var(--bs-success), var(--bs-white) 60%);
+  --bs-info-text-emphasis: color-mix(in srgb, var(--bs-info), var(--bs-black) 60%);
+  --bs-info-bg-subtle: color-mix(in srgb, var(--bs-info), var(--bs-white) 80%);
+  --bs-info-border-subtle: color-mix(in srgb, var(--bs-info), var(--bs-white) 60%);
+  --bs-warning-text-emphasis: color-mix(in srgb, var(--bs-warning), var(--bs-black) 60%);
+  --bs-warning-bg-subtle: color-mix(in srgb, var(--bs-warning), var(--bs-white) 80%);
+  --bs-warning-border-subtle: color-mix(in srgb, var(--bs-warning), var(--bs-white) 60%);
+  --bs-danger-text-emphasis: color-mix(in srgb, var(--bs-danger), var(--bs-black) 60%);
+  --bs-danger-bg-subtle: color-mix(in srgb, var(--bs-danger), var(--bs-white) 80%);
+  --bs-danger-border-subtle: color-mix(in srgb, var(--bs-danger), var(--bs-white) 60%);
+  --bs-secondary-color: color-mix(in srgb, var(--bs-body-color) 75%, transparent);
+  --bs-tertiary-color: color-mix(in srgb, var(--bs-body-color) 50%, transparent);
+  --bs-link-hover-color: color-mix(in srgb, var(--bs-link-color), var(--bs-black) 20%);
+  --bs-focus-ring-color: color-mix(in srgb, var(--bs-primary) 25%, transparent);
 }
 
 [data-bs-theme=dark] {
@@ -348,11 +357,11 @@ sup {
 }
 
 a {
-  color: rgba(var(--bs-link-color-rgb), var(--bs-link-opacity, 1));
   text-decoration: underline;
+  color: color-mix(in srgb, var(--bs-link-color) calc(var(--bs-link-opacity, 1) * 100%), transparent);
 }
 a:hover {
-  --bs-link-color-rgb: var(--bs-link-hover-color-rgb);
+  color: color-mix(in srgb, var(--bs-link-hover-color) calc(var(--bs-link-opacity, 1) * 100%), transparent);
 }
 
 a:not([href]):not([class]), a:not([href]):not([class]):hover {

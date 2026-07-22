@@ -1,0 +1,36 @@
+// Representative Shopify theme build: configure first, then import only the
+// Bootstrap layers and components used by the theme.
+// stylelint-disable scss/dollar-variable-default
+$enable-dark-mode: false;
+$enable-reactive-colors: true;
+$enable-reactive-spacing: true;
+$enable-reactive-color-fallbacks: false;
+// stylelint-enable scss/dollar-variable-default
+
+@import "../../scss/functions";
+@import "../../scss/variables";
+@import "../../scss/maps";
+@import "../../scss/mixins";
+@import "../../scss/utilities";
+
+@import "../../scss/root";
+@import "../../scss/reboot";
+@import "../../scss/type";
+@import "../../scss/images";
+@import "../../scss/containers";
+@import "../../scss/grid";
+@import "../../scss/tables";
+@import "../../scss/forms";
+@import "../../scss/buttons";
+@import "../../scss/transitions";
+@import "../../scss/dropdown";
+@import "../../scss/button-group";
+@import "../../scss/nav";
+@import "../../scss/accordion";
+@import "../../scss/breadcrumb";
+@import "../../scss/pagination";
+@import "../../scss/alert";
+@import "../../scss/progress";
+@import "../../scss/close";
+@import "../../scss/helpers";
+@import "../../scss/utilities/api";

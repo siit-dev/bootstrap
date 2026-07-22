@@ -1,0 +1,14 @@
+@import "../../functions";
+@import "../../variables";
+
+// This fixture deliberately extends Bootstrap's initialized default map.
+// stylelint-disable-next-line scss/dollar-variable-default
+$theme-colors: map-merge($theme-colors, ("brand": #7a2ca6));
+
+@import "../../variables-dark";
+@import "../../maps";
+@import "../../mixins";
+@import "../../utilities";
+@import "../../root";
+@import "../../buttons";
+@import "../../alert";

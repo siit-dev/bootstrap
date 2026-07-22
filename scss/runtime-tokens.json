@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "browserContract": {
+    "reactiveColors": "color-mix(in srgb, black, white)",
+    "fallbackFlag": "$enable-reactive-color-fallbacks",
+    "fallbackBehavior": "static-derived-values"
+  },
+  "colors": {
+    "sourcePattern": "--bs-{theme-color}",
+    "sourceType": "opaque-color",
+    "requiredCompanions": {
+      "--bs-{theme-color}-rgb": "comma-separated-rgb-channels",
+      "--bs-{theme-color}-contrast": "opaque-color"
+    },
+    "reactiveDerivedPatterns": [
+      "--bs-{theme-color}-text-emphasis",
+      "--bs-{theme-color}-bg-subtle",
+      "--bs-{theme-color}-border-subtle"
+    ],
+    "staticThemeLeaves": ["light", "dark"]
+  },
+  "spacing": {
+    "source": "--bs-spacer",
+    "type": "dimension",
+    "allowedUnits": ["px", "rem", "em"],
+    "consumers": [
+      "default-spacing-utilities",
+      "negative-margin-utilities",
+      "grid-gutter-utilities"
+    ],
+    "customSassMaps": "static-leaves"
+  }
+}

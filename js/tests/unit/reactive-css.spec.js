@@ -91,4 +91,31 @@ describe('reactive CSS tokens', () => {
     expect(getComputedStyle(host.querySelector('.row')).getPropertyValue('--bs-gutter-x').trim()).toBe('calc(20px * 0.5)')
     expect(getComputedStyle(host.querySelector('.col')).paddingLeft).toBe('5px')
   })
+
+  it('keeps a theme-scale mutation below the experimental runtime pass', () => {
+    host.innerHTML = '<button class="btn btn-primary" style="transition: none">Button</button>'.repeat(2000)
+
+    const root = host.getRootNode().host
+    const lastButton = host.lastElementChild
+    const samples = []
+
+    for (let index = 0; index < 25; index++) {
+      const start = performance.now()
+
+      root.style.setProperty('--bs-primary', index % 2 === 0 ? '#7654ff' : '#b4235f')
+      getComputedStyle(lastButton).getPropertyValue('background-color')
+
+      if (index >= 5) {
+        samples.push(performance.now() - start)
+      }
+    }
+
+    samples.sort((first, second) => first - second)
+    const median = samples[Math.floor(samples.length / 2)]
+    const p95 = samples[Math.ceil(samples.length * 0.95) - 1]
+
+    console.info(`[reactive-css] 2,000 buttons: median ${median.toFixed(2)}ms, p95 ${p95.toFixed(2)}ms`)
+    expect(median).toBeLessThan(23)
+    expect(p95).toBeLessThan(24)
+  })
 })
