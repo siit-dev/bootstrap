@@ -12,6 +12,8 @@ const ENV = process.env
 const BROWSERSTACK = Boolean(ENV.BROWSERSTACK)
 const DEBUG = Boolean(ENV.DEBUG)
 const JQUERY_TEST = Boolean(ENV.JQUERY)
+const REACTIVE_CSS_TEST = Boolean(ENV.REACTIVE_CSS_TEST)
+const { REACTIVE_CSS_BROWSER } = ENV
 
 const frameworks = [
   'jasmine'
@@ -60,6 +62,12 @@ const config = {
   },
   files: [
     'node_modules/hammer-simulator/index.js',
+    {
+      pattern: 'dist/css/bootstrap.css',
+      included: false,
+      served: true,
+      watched: false
+    },
     {
       pattern: 'js/tests/unit/**/!(jquery).spec.js',
       watched: !BROWSERSTACK
@@ -111,6 +119,24 @@ if (BROWSERSTACK) {
   config.customLaunchers = browsers
   config.browsers = Object.keys(browsers)
   reporters.push('BrowserStack', 'kjhtml')
+} else if (REACTIVE_CSS_TEST) {
+  plugins.push(
+    'karma-chrome-launcher',
+    'karma-firefox-launcher'
+  )
+  config.files = [
+    {
+      pattern: 'dist/css/bootstrap.css',
+      included: false,
+      served: true,
+      watched: false
+    },
+    {
+      pattern: 'js/tests/unit/reactive-css.spec.js',
+      watched: false
+    }
+  ]
+  config.browsers = REACTIVE_CSS_BROWSER ? [REACTIVE_CSS_BROWSER] : ['ChromeHeadless', 'FirefoxHeadless']
 } else if (JQUERY_TEST) {
   frameworks.push('detectBrowsers')
   plugins.push(

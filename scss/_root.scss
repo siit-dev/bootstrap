@@ -1,3 +1,18 @@
+@mixin root-reactive-color-values {
+  @each $color, $value in $theme-colors {
+    @if $color != "light" and $color != "dark" {
+      --#{$prefix}#{$color}-text-emphasis: color-mix(in srgb, var(--#{$prefix}#{$color}), var(--#{$prefix}black) 60%);
+      --#{$prefix}#{$color}-bg-subtle: color-mix(in srgb, var(--#{$prefix}#{$color}), var(--#{$prefix}white) 80%);
+      --#{$prefix}#{$color}-border-subtle: color-mix(in srgb, var(--#{$prefix}#{$color}), var(--#{$prefix}white) 60%);
+    }
+  }
+
+  --#{$prefix}secondary-color: color-mix(in srgb, var(--#{$prefix}body-color) 75%, transparent);
+  --#{$prefix}tertiary-color: color-mix(in srgb, var(--#{$prefix}body-color) 50%, transparent);
+  --#{$prefix}link-hover-color: color-mix(in srgb, var(--#{$prefix}link-color), var(--#{$prefix}black) #{$link-shade-percentage});
+  --#{$prefix}focus-ring-color: color-mix(in srgb, var(--#{$prefix}primary) #{$focus-ring-opacity * 100%}, transparent);
+}
+
 :root,
 [data-bs-theme="light"] {
   // Note: Custom variable values only support SassScript inside `#{}`.
@@ -40,16 +55,6 @@
     }
   }
 
-  @include reactive-color-mix-override() {
-    @each $color, $value in $theme-colors {
-      @if $color != "light" and $color != "dark" {
-        --#{$prefix}#{$color}-text-emphasis: color-mix(in srgb, var(--#{$prefix}#{$color}), var(--#{$prefix}black) 60%);
-        --#{$prefix}#{$color}-bg-subtle: color-mix(in srgb, var(--#{$prefix}#{$color}), var(--#{$prefix}white) 80%);
-        --#{$prefix}#{$color}-border-subtle: color-mix(in srgb, var(--#{$prefix}#{$color}), var(--#{$prefix}white) 60%);
-      }
-    }
-  }
-
   --#{$prefix}white-rgb: #{to-rgb($white)};
   --#{$prefix}black-rgb: #{to-rgb($black)};
 
@@ -83,12 +88,16 @@
   --#{$prefix}emphasis-color: #{$body-emphasis-color};
   --#{$prefix}emphasis-color-rgb: #{to-rgb($body-emphasis-color)};
 
-  @include reactive-color-mix-value(--#{$prefix}secondary-color, $body-secondary-color, color-mix(in srgb, var(--#{$prefix}body-color) 75%, transparent));
+  @if not $enable-reactive-colors or $enable-reactive-color-fallbacks {
+    --#{$prefix}secondary-color: #{$body-secondary-color};
+  }
   --#{$prefix}secondary-color-rgb: #{to-rgb($body-secondary-color)};
   --#{$prefix}secondary-bg: #{$body-secondary-bg};
   --#{$prefix}secondary-bg-rgb: #{to-rgb($body-secondary-bg)};
 
-  @include reactive-color-mix-value(--#{$prefix}tertiary-color, $body-tertiary-color, color-mix(in srgb, var(--#{$prefix}body-color) 50%, transparent));
+  @if not $enable-reactive-colors or $enable-reactive-color-fallbacks {
+    --#{$prefix}tertiary-color: #{$body-tertiary-color};
+  }
   --#{$prefix}tertiary-color-rgb: #{to-rgb($body-tertiary-color)};
   --#{$prefix}tertiary-bg: #{$body-tertiary-bg};
   --#{$prefix}tertiary-bg-rgb: #{to-rgb($body-tertiary-bg)};
@@ -100,7 +109,9 @@
   --#{$prefix}link-color-rgb: #{to-rgb($link-color)};
   --#{$prefix}link-decoration: #{$link-decoration};
 
-  @include reactive-color-mix-value(--#{$prefix}link-hover-color, $link-hover-color, color-mix(in srgb, var(--#{$prefix}link-color), var(--#{$prefix}black) #{$link-shade-percentage}));
+  @if not $enable-reactive-colors or $enable-reactive-color-fallbacks {
+    --#{$prefix}link-hover-color: #{$link-hover-color};
+  }
   --#{$prefix}link-hover-color-rgb: #{to-rgb($link-hover-color)};
 
   @if $link-hover-decoration != null {
@@ -135,7 +146,9 @@
   // scss-docs-start root-focus-variables
   --#{$prefix}focus-ring-width: #{$focus-ring-width};
   --#{$prefix}focus-ring-opacity: #{$focus-ring-opacity};
-  @include reactive-color-mix-value(--#{$prefix}focus-ring-color, $focus-ring-color, color-mix(in srgb, var(--#{$prefix}primary) #{$focus-ring-opacity * 100%}, transparent));
+  @if not $enable-reactive-colors or $enable-reactive-color-fallbacks {
+    --#{$prefix}focus-ring-color: #{$focus-ring-color};
+  }
   // scss-docs-end root-focus-variables
 
   // scss-docs-start root-form-validation-variables
@@ -144,6 +157,19 @@
   --#{$prefix}form-invalid-color: #{if($enable-reactive-colors, var(--#{$prefix}danger), $form-invalid-color)};
   --#{$prefix}form-invalid-border-color: #{if($enable-reactive-colors, var(--#{$prefix}danger), $form-invalid-border-color)};
   // scss-docs-end root-form-validation-variables
+
+  @if $enable-reactive-colors and not $enable-reactive-color-fallbacks {
+    @include root-reactive-color-values();
+  }
+}
+
+@if $enable-reactive-colors and $enable-reactive-color-fallbacks {
+  @include reactive-color-mix-override() {
+    :root,
+    [data-bs-theme="light"] {
+      @include root-reactive-color-values();
+    }
+  }
 }
 
 @if $enable-dark-mode {

@@ -55,6 +55,7 @@
     "css-prefix-examples": "postcss --config build/postcss.config.mjs --replace \"site/src/assets/examples/**/*.css\"",
     "css-prefix-examples-rtl": "cross-env-shell NODE_ENV=RTL postcss --config build/postcss.config.mjs --dir \"site/src/assets/examples/\" --ext \".rtl.css\" --base \"site/src/assets/examples/\" \"site/src/assets/examples/{blog,carousel,dashboard,cheatsheet}/*.css\" \"!site/src/assets/examples/{blog,carousel,dashboard,cheatsheet}/*.rtl.css\"",
     "css-test": "jasmine --config=scss/tests/jasmine.js",
+    "css-test-runtime": "cross-env REACTIVE_CSS_TEST=true karma start js/tests/karma.conf.js",
     "js": "npm-run-all js-compile js-minify",
     "js-compile": "npm-run-all --aggregate-output --parallel js-compile-*",
     "js-compile-standalone": "rollup --environment BUNDLE:false --config build/rollup.config.mjs --sourcemap",
@@ -191,6 +192,7 @@
     "js/{src,dist}/**/*.{js,map}",
     "js/index.{esm,umd}.js",
     "scss/**/*.scss",
+    "scss/runtime-tokens.json",
     "!scss/tests/**"
   ],
   "jspm": {
