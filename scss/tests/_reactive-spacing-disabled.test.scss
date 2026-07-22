@@ -1,0 +1,11 @@
+$enable-reactive-spacing: false;
+
+@import "../functions";
+@import "../variables";
+
+@include describe("disabled reactive spacing") {
+  @include it("restores Bootstrap's static default scale") {
+    @include assert-equal(map-get($spacers, 3), 1rem);
+    @include assert-equal(map-get($spacers, 4), 1.5rem);
+  }
+}

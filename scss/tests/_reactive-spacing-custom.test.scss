@@ -1,0 +1,16 @@
+$spacers: (
+  compact: .375rem,
+  roomy: 2.25rem,
+);
+
+@import "../functions";
+@import "../variables";
+@import "../maps";
+
+@include describe("custom spacing maps") {
+  @include it("preserves explicit consumer values") {
+    @include assert-equal(map-get($spacers, compact), .375rem);
+    @include assert-equal(map-get($spacers, roomy), 2.25rem);
+    @include assert-equal($gutters, $spacers);
+  }
+}
