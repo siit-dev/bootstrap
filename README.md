@@ -1,33 +1,36 @@
 <p align="center">
-  <a href="https://getbootstrap.com/">
+  <a href="https://github.com/siit-dev/bootstrap">
     <img src="https://getbootstrap.com/docs/5.3/assets/brand/bootstrap-logo-shadow.png" alt="Bootstrap logo" width="200" height="165">
   </a>
 </p>
 
-<h3 align="center">Bootstrap</h3>
+<h3 align="center">Smart Impact Bootstrap</h3>
 
 <p align="center">
-  Sleek, intuitive, and powerful front-end framework for faster and easier web development.
+  A Shopify-oriented Bootstrap 5.3 distribution with reactive CSS color and spacing tokens.
   <br>
   <a href="https://getbootstrap.com/docs/5.3/"><strong>Explore Bootstrap docs »</strong></a>
   <br>
   <br>
-  <a href="https://github.com/twbs/bootstrap/issues/new?assignees=-&labels=bug&template=bug_report.yml">Report bug</a>
+  <a href="https://github.com/siit-dev/bootstrap/issues/new">Report bug</a>
   ·
-  <a href="https://github.com/twbs/bootstrap/issues/new?assignees=&labels=feature&template=feature_request.yml">Request feature</a>
+  <a href="https://github.com/siit-dev/bootstrap/issues/new">Request feature</a>
   ·
-  <a href="https://blog.getbootstrap.com/">Blog</a>
+  <a href="https://github.com/twbs/bootstrap">Upstream Bootstrap</a>
 </p>
 
 
-## Bootstrap 5
+## Smart Impact Bootstrap 5
 
-Our default branch is for development of our Bootstrap 5 release. Head to the [`v4-dev` branch](https://github.com/twbs/bootstrap/tree/v4-dev) to view the readme, documentation, and source code for Bootstrap 4.
+This public fork is maintained by Smart Impact for Shopify themes that need runtime-overridable design tokens and reactive derived values. It remains based on Bootstrap 5.3.8 and retains Bootstrap's MIT license, copyright, API, Sass, and JavaScript module structure.
+
+The fork has its own release cadence and compatibility policy. Changes from [upstream Bootstrap](https://github.com/twbs/bootstrap) are selected and integrated through pull requests rather than inherited automatically.
 
 
 ## Table of contents
 
 - [Quick start](#quick-start)
+- [Distribution contract](#distribution-contract)
 - [Status](#status)
 - [What’s included](#whats-included)
 - [Bugs and feature requests](#bugs-and-feature-requests)
@@ -42,35 +45,40 @@ Our default branch is for development of our Bootstrap 5 release. Head to the [`
 
 ## Quick start
 
-Several quick start options are available:
+Shopify themes should install the fork through an [npm dependency alias](https://docs.npmjs.com/cli/v11/using-npm/package-spec/). This preserves existing `bootstrap/scss/...` and JavaScript imports:
 
-- [Download the latest release](https://github.com/twbs/bootstrap/archive/v5.3.8.zip)
-- Clone the repo: `git clone https://github.com/twbs/bootstrap.git`
-- Install with [npm](https://www.npmjs.com/): `npm install bootstrap@v5.3.8`
-- Install with [yarn](https://yarnpkg.com/): `yarn add bootstrap@v5.3.8`
-- Install with [Bun](https://bun.sh/): `bun add bootstrap@v5.3.8`
-- Install with [Composer](https://getcomposer.org/): `composer require twbs/bootstrap:5.3.8`
-- Install with [NuGet](https://www.nuget.org/): CSS: `Install-Package bootstrap` Sass: `Install-Package bootstrap.sass`
+```json
+{
+  "dependencies": {
+    "bootstrap": "npm:@smartimpact-it/bootstrap@5.3.8-smartimpact.1"
+  }
+}
+```
 
-Read the [Getting started page](https://getbootstrap.com/docs/5.3/getting-started/introduction/) for information on the framework contents, templates, examples, and more.
+Alternatively, install the scoped package directly with `npm install @smartimpact-it/bootstrap@5.3.8-smartimpact.1`.
+
+For source development:
+
+- Clone the repository: `git clone git@github.com:siit-dev/bootstrap.git`
+- Install dependencies: `npm ci`
+- Generate the distributions: `npm run dist`
+
+Generated `dist/` and `js/dist/` files are intentionally absent from source control. They are rebuilt for npm packages and GitHub releases, so GitHub's automatic source archives are not standalone distributions.
+
+
+## Distribution contract
+
+The package keeps Bootstrap's established entry points (`main`, `module`, `style`, and `sass`) and includes compiled CSS, RTL CSS, JavaScript bundles, individual plugins, source maps, Sass sources, and `scss/runtime-tokens.json`.
+
+Custom releases use `5.3.8-smartimpact.N`. Moving to a different upstream Bootstrap release changes the base version and is an explicit upgrade for consuming themes. `npm run release-version -- <version>` updates only the package and lockfile version; Bootstrap's upstream runtime/API version remains separate.
+
+Read Bootstrap's [Getting started page](https://getbootstrap.com/docs/5.3/getting-started/introduction/) for the upstream framework documentation.
 
 
 ## Status
 
-[![Build Status](https://img.shields.io/github/actions/workflow/status/twbs/bootstrap/js.yml?branch=main&label=JS%20Tests&logo=github)](https://github.com/twbs/bootstrap/actions/workflows/js.yml?query=workflow%3AJS+branch%3Amain)
-[![npm version](https://img.shields.io/npm/v/bootstrap?logo=npm&logoColor=fff)](https://www.npmjs.com/package/bootstrap)
-[![Gem version](https://img.shields.io/gem/v/bootstrap?logo=rubygems&logoColor=fff)](https://rubygems.org/gems/bootstrap)
-[![Meteor Atmosphere](https://img.shields.io/badge/meteor-twbs%3Abootstrap-blue?logo=meteor&logoColor=fff)](https://atmospherejs.com/twbs/bootstrap)
-[![Packagist Prerelease](https://img.shields.io/packagist/vpre/twbs/bootstrap?logo=packagist&logoColor=fff)](https://packagist.org/packages/twbs/bootstrap)
-[![NuGet](https://img.shields.io/nuget/vpre/bootstrap?logo=nuget&logoColor=fff)](https://www.nuget.org/packages/bootstrap/absoluteLatest)
-[![Coverage Status](https://img.shields.io/coveralls/github/twbs/bootstrap/main?logo=coveralls&logoColor=fff)](https://coveralls.io/github/twbs/bootstrap?branch=main)
-[![CSS gzip size](https://img.badgesize.io/twbs/bootstrap/main/dist/css/bootstrap.min.css?compression=gzip&label=CSS%20gzip%20size)](https://github.com/twbs/bootstrap/blob/main/dist/css/bootstrap.min.css)
-[![CSS Brotli size](https://img.badgesize.io/twbs/bootstrap/main/dist/css/bootstrap.min.css?compression=brotli&label=CSS%20Brotli%20size)](https://github.com/twbs/bootstrap/blob/main/dist/css/bootstrap.min.css)
-[![JS gzip size](https://img.badgesize.io/twbs/bootstrap/main/dist/js/bootstrap.min.js?compression=gzip&label=JS%20gzip%20size)](https://github.com/twbs/bootstrap/blob/main/dist/js/bootstrap.min.js)
-[![JS Brotli size](https://img.badgesize.io/twbs/bootstrap/main/dist/js/bootstrap.min.js?compression=brotli&label=JS%20Brotli%20size)](https://github.com/twbs/bootstrap/blob/main/dist/js/bootstrap.min.js)
-![Open Source Security Foundation Scorecard](https://img.shields.io/ossf-scorecard/github.com/twbs/bootstrap)
-[![Backers on Open Collective](https://img.shields.io/opencollective/backers/bootstrap?logo=opencollective&logoColor=fff)](#backers)
-[![Sponsors on Open Collective](https://img.shields.io/opencollective/sponsors/bootstrap?logo=opencollective&logoColor=fff)](#sponsors)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/siit-dev/bootstrap/css.yml?branch=main&label=CSS%20Tests&logo=github)](https://github.com/siit-dev/bootstrap/actions)
+[![npm version](https://img.shields.io/npm/v/%40smartimpact-it%2Fbootstrap?logo=npm&logoColor=fff)](https://www.npmjs.com/package/@smartimpact-it/bootstrap)
 
 
 ## What’s included
@@ -136,19 +144,19 @@ We provide compiled CSS and JS (`bootstrap.*`), as well as compiled and minified
 
 ## Bugs and feature requests
 
-Have a bug or a feature request? Please first read the [issue guidelines](https://github.com/twbs/bootstrap/blob/main/.github/CONTRIBUTING.md#using-the-issue-tracker) and search for existing and closed issues. If your problem or idea is not addressed yet, [please open a new issue](https://github.com/twbs/bootstrap/issues/new/choose).
+Have a fork-specific bug or feature request? Search existing and closed issues, then [open an issue](https://github.com/siit-dev/bootstrap/issues/new). Report issues reproducible in unmodified Bootstrap to the [upstream project](https://github.com/twbs/bootstrap/issues/new/choose).
 
 
 ## Documentation
 
-Bootstrap’s documentation, included in this repo in the root directory, is built with [Astro](https://astro.build/) and publicly hosted on GitHub Pages at <https://getbootstrap.com/>. The docs may also be run locally.
+Bootstrap’s documentation, included in this repository, is built with [Astro](https://astro.build/). The upstream documentation is hosted at <https://getbootstrap.com/>. The docs may also be run locally.
 
 Documentation search is powered by [Algolia's DocSearch](https://docsearch.algolia.com/).
 
 ### Running documentation locally
 
-1. Run `npm install` to install the Node.js dependencies, including Astro (the site builder).
-2. Run `npm run test` (or a specific npm script) to rebuild distributed CSS and JavaScript files, as well as our docs assets.
+1. Run `npm ci` to install the Node.js dependencies, including Astro (the site builder).
+2. Run `npm run docs-build`; it rebuilds the untracked CSS and JavaScript distributions before building the docs.
 3. From the root `/bootstrap` directory, run `npm run docs-serve` in the command line.
 4. Open <http://localhost:9001> in your browser, and voilà.
 
@@ -163,7 +171,7 @@ You can find all our previous releases docs on <https://getbootstrap.com/docs/ve
 
 ## Contributing
 
-Please read through our [contributing guidelines](https://github.com/twbs/bootstrap/blob/main/.github/CONTRIBUTING.md). Included are directions for opening issues, coding standards, and notes on development.
+Please read through our [contributing guidelines](https://github.com/siit-dev/bootstrap/blob/main/.github/CONTRIBUTING.md). Included are directions for opening issues, coding standards, and notes on development.
 
 Moreover, if your pull request contains JavaScript patches or features, you must include [relevant unit tests](https://github.com/twbs/bootstrap/tree/main/js/tests). All HTML and CSS should conform to the [Code Guide](https://github.com/mdo/code-guide), maintained by [Mark Otto](https://github.com/mdo).
 
@@ -185,9 +193,9 @@ Get updates on Bootstrap’s development and chat with the project maintainers a
 
 ## Versioning
 
-For transparency into our release cycle and in striving to maintain backward compatibility, Bootstrap is maintained under [the Semantic Versioning guidelines](https://semver.org/). Sometimes we screw up, but we adhere to those rules whenever possible.
+Smart Impact release versions combine the upstream Bootstrap base with a fork revision, for example `5.3.8-smartimpact.1`. Revisions with the same base preserve the supported Bootstrap 5.3 API unless a release note explicitly says otherwise. A new base version is treated as an explicit dependency upgrade.
 
-See [the Releases section of our GitHub project](https://github.com/twbs/bootstrap/releases) for changelogs for each release version of Bootstrap. Release announcement posts on [the official Bootstrap blog](https://blog.getbootstrap.com/) contain summaries of the most noteworthy changes made in each release.
+See [this repository's releases](https://github.com/siit-dev/bootstrap/releases) for fork changelogs and [Bootstrap's releases](https://github.com/twbs/bootstrap/releases) for upstream history.
 
 
 ## Creators
@@ -243,4 +251,4 @@ Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com
 
 ## Copyright and license
 
-Code and documentation copyright 2011-2026 the [Bootstrap Authors](https://github.com/twbs/bootstrap/graphs/contributors). Code released under the [MIT License](https://github.com/twbs/bootstrap/blob/main/LICENSE). Docs released under [Creative Commons](https://creativecommons.org/licenses/by/3.0/).
+Code and documentation copyright 2011-2026 the [Bootstrap Authors](https://github.com/twbs/bootstrap/graphs/contributors). Smart Impact maintains this modified distribution without removing upstream attribution. Code is released under the repository's [MIT License](LICENSE). Upstream docs are released under [Creative Commons](https://creativecommons.org/licenses/by/3.0/).

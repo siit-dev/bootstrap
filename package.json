@@ -2,9 +2,6 @@
   "name": "@smartimpact-it/bootstrap",
   "description": "Smart Impact's Bootstrap distribution with Shopify-oriented reactive runtime tokens.",
   "version": "5.3.8-smartimpact.1",
-  "config": {
-    "version_short": "5.3"
-  },
   "bootstrapVersion": "5.3.8",
   "keywords": [
     "css",
