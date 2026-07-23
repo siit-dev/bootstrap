@@ -9,7 +9,7 @@ Smart Impact releases are published from `main` as `@smartimpact-it/bootstrap` a
 3. Merge the release pull request into `main`.
 4. Run the **Release** workflow manually on `main`, entering the exact package version.
 
-The workflow validates the requested version and repository state, runs the complete validation suite, creates the npm tarball and standalone distribution ZIP, writes `SHA256SUMS`, and creates or resumes a draft GitHub release. It publishes the exact tarball to npm before publishing the GitHub release.
+The workflow validates the requested version and repository state, runs the complete validation suite, creates the npm tarball and standalone distribution ZIP, writes `SHA256SUMS`, and creates or resumes a draft GitHub release. It publishes the exact tarball to npm with the `latest` dist-tag before publishing the GitHub release. Although Smart Impact versions use a SemVer prerelease suffix, this package is the dedicated production distribution for its scope.
 
 If a run fails after creating the draft, fix the cause and rerun the workflow with the same version. Existing npm versions are accepted only when their repository and git commit metadata match the current release commit.
 
