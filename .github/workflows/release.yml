@@ -169,7 +169,7 @@ jobs:
 
       - name: Publish exact npm tarball
         if: steps.preflight.outputs.npm_exists != 'true'
-        run: npm publish "${{ steps.artifacts.outputs.tarball }}" --access public --provenance
+        run: npm publish "${{ steps.artifacts.outputs.tarball }}" --access public --tag latest --provenance
 
       - name: Verify the published npm alias
         run: |
