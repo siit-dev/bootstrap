@@ -58,14 +58,14 @@
   }
 
   &:focus {
-    border-color: $form-check-input-focus-border;
     outline: 0;
-    box-shadow: $form-check-input-focus-box-shadow;
+    box-shadow: #{if($enable-reactive-colors, 0 0 0 $focus-ring-width var(--#{$prefix}focus-ring-color), $form-check-input-focus-box-shadow)};
+    @include reactive-color-mix-value(border-color, $form-check-input-focus-border, color-mix(in srgb, var(--#{$prefix}primary), var(--#{$prefix}white) 50%));
   }
 
   &:checked {
-    background-color: $form-check-input-checked-bg-color;
-    border-color: $form-check-input-checked-border-color;
+    background-color: #{if($enable-reactive-colors, var(--#{$prefix}primary), $form-check-input-checked-bg-color)};
+    border-color: #{if($enable-reactive-colors, var(--#{$prefix}primary), $form-check-input-checked-border-color)};
 
     &[type="checkbox"] {
       @if $enable-gradients {
@@ -85,8 +85,8 @@
   }
 
   &[type="checkbox"]:indeterminate {
-    background-color: $form-check-input-indeterminate-bg-color;
-    border-color: $form-check-input-indeterminate-border-color;
+    background-color: #{if($enable-reactive-colors, var(--#{$prefix}primary), $form-check-input-indeterminate-bg-color)};
+    border-color: #{if($enable-reactive-colors, var(--#{$prefix}primary), $form-check-input-indeterminate-border-color)};
 
     @if $enable-gradients {
       --#{$prefix}form-check-bg-image: #{escape-svg($form-check-input-indeterminate-bg-image)}, var(--#{$prefix}gradient);

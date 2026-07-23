@@ -1,3 +1,18 @@
+@mixin root-reactive-color-values {
+  @each $color, $value in $theme-colors {
+    @if $color != "light" and $color != "dark" {
+      --#{$prefix}#{$color}-text-emphasis: color-mix(in srgb, var(--#{$prefix}#{$color}), var(--#{$prefix}black) 60%);
+      --#{$prefix}#{$color}-bg-subtle: color-mix(in srgb, var(--#{$prefix}#{$color}), var(--#{$prefix}white) 80%);
+      --#{$prefix}#{$color}-border-subtle: color-mix(in srgb, var(--#{$prefix}#{$color}), var(--#{$prefix}white) 60%);
+    }
+  }
+
+  --#{$prefix}secondary-color: color-mix(in srgb, var(--#{$prefix}body-color) 75%, transparent);
+  --#{$prefix}tertiary-color: color-mix(in srgb, var(--#{$prefix}body-color) 50%, transparent);
+  --#{$prefix}link-hover-color: color-mix(in srgb, var(--#{$prefix}link-color), var(--#{$prefix}black) #{$link-shade-percentage});
+  --#{$prefix}focus-ring-color: color-mix(in srgb, var(--#{$prefix}primary) #{$focus-ring-opacity * 100%}, transparent);
+}
+
 :root,
 [data-bs-theme="light"] {
   // Note: Custom variable values only support SassScript inside `#{}`.
@@ -16,22 +31,28 @@
 
   @each $color, $value in $theme-colors {
     --#{$prefix}#{$color}: #{$value};
+    --#{$prefix}#{$color}-contrast: #{color-contrast($value)};
   }
 
   @each $color, $value in $theme-colors-rgb {
     --#{$prefix}#{$color}-rgb: #{$value};
   }
 
-  @each $color, $value in $theme-colors-text {
-    --#{$prefix}#{$color}-text-emphasis: #{$value};
-  }
+  @each $color, $value in $theme-colors {
+    $has-static-emphasis: map-has-key($theme-colors-text, $color);
+    $has-static-bg: map-has-key($theme-colors-bg-subtle, $color);
+    $has-static-border: map-has-key($theme-colors-border-subtle, $color);
+    $static-emphasis: if($has-static-emphasis, map-get($theme-colors-text, $color), shade-color($value, 60%));
+    $static-bg: if($has-static-bg, map-get($theme-colors-bg-subtle, $color), tint-color($value, 80%));
+    $static-border: if($has-static-border, map-get($theme-colors-border-subtle, $color), tint-color($value, 60%));
 
-  @each $color, $value in $theme-colors-bg-subtle {
-    --#{$prefix}#{$color}-bg-subtle: #{$value};
-  }
-
-  @each $color, $value in $theme-colors-border-subtle {
-    --#{$prefix}#{$color}-border-subtle: #{$value};
+    // Bootstrap's light and dark variants intentionally use gray palette leaves
+    // rather than a formula, so they remain static to preserve exact output.
+    @if not $enable-reactive-colors or $enable-reactive-color-fallbacks or $color == "light" or $color == "dark" {
+      --#{$prefix}#{$color}-text-emphasis: #{$static-emphasis};
+      --#{$prefix}#{$color}-bg-subtle: #{$static-bg};
+      --#{$prefix}#{$color}-border-subtle: #{$static-border};
+    }
   }
 
   --#{$prefix}white-rgb: #{to-rgb($white)};
@@ -44,6 +65,7 @@
   --#{$prefix}font-sans-serif: #{inspect($font-family-sans-serif)};
   --#{$prefix}font-monospace: #{inspect($font-family-monospace)};
   --#{$prefix}gradient: #{$gradient};
+  --#{$prefix}spacer: #{$spacer};
 
   // Root and body
   // scss-docs-start root-body-variables
@@ -66,12 +88,16 @@
   --#{$prefix}emphasis-color: #{$body-emphasis-color};
   --#{$prefix}emphasis-color-rgb: #{to-rgb($body-emphasis-color)};
 
-  --#{$prefix}secondary-color: #{$body-secondary-color};
+  @if not $enable-reactive-colors or $enable-reactive-color-fallbacks {
+    --#{$prefix}secondary-color: #{$body-secondary-color};
+  }
   --#{$prefix}secondary-color-rgb: #{to-rgb($body-secondary-color)};
   --#{$prefix}secondary-bg: #{$body-secondary-bg};
   --#{$prefix}secondary-bg-rgb: #{to-rgb($body-secondary-bg)};
 
-  --#{$prefix}tertiary-color: #{$body-tertiary-color};
+  @if not $enable-reactive-colors or $enable-reactive-color-fallbacks {
+    --#{$prefix}tertiary-color: #{$body-tertiary-color};
+  }
   --#{$prefix}tertiary-color-rgb: #{to-rgb($body-tertiary-color)};
   --#{$prefix}tertiary-bg: #{$body-tertiary-bg};
   --#{$prefix}tertiary-bg-rgb: #{to-rgb($body-tertiary-bg)};
@@ -83,7 +109,9 @@
   --#{$prefix}link-color-rgb: #{to-rgb($link-color)};
   --#{$prefix}link-decoration: #{$link-decoration};
 
-  --#{$prefix}link-hover-color: #{$link-hover-color};
+  @if not $enable-reactive-colors or $enable-reactive-color-fallbacks {
+    --#{$prefix}link-hover-color: #{$link-hover-color};
+  }
   --#{$prefix}link-hover-color-rgb: #{to-rgb($link-hover-color)};
 
   @if $link-hover-decoration != null {
@@ -118,15 +146,30 @@
   // scss-docs-start root-focus-variables
   --#{$prefix}focus-ring-width: #{$focus-ring-width};
   --#{$prefix}focus-ring-opacity: #{$focus-ring-opacity};
-  --#{$prefix}focus-ring-color: #{$focus-ring-color};
+  @if not $enable-reactive-colors or $enable-reactive-color-fallbacks {
+    --#{$prefix}focus-ring-color: #{$focus-ring-color};
+  }
   // scss-docs-end root-focus-variables
 
   // scss-docs-start root-form-validation-variables
-  --#{$prefix}form-valid-color: #{$form-valid-color};
-  --#{$prefix}form-valid-border-color: #{$form-valid-border-color};
-  --#{$prefix}form-invalid-color: #{$form-invalid-color};
-  --#{$prefix}form-invalid-border-color: #{$form-invalid-border-color};
+  --#{$prefix}form-valid-color: #{if($enable-reactive-colors, var(--#{$prefix}success), $form-valid-color)};
+  --#{$prefix}form-valid-border-color: #{if($enable-reactive-colors, var(--#{$prefix}success), $form-valid-border-color)};
+  --#{$prefix}form-invalid-color: #{if($enable-reactive-colors, var(--#{$prefix}danger), $form-invalid-color)};
+  --#{$prefix}form-invalid-border-color: #{if($enable-reactive-colors, var(--#{$prefix}danger), $form-invalid-border-color)};
   // scss-docs-end root-form-validation-variables
+
+  @if $enable-reactive-colors and not $enable-reactive-color-fallbacks {
+    @include root-reactive-color-values();
+  }
+}
+
+@if $enable-reactive-colors and $enable-reactive-color-fallbacks {
+  @include reactive-color-mix-override() {
+    :root,
+    [data-bs-theme="light"] {
+      @include root-reactive-color-values();
+    }
+  }
 }
 
 @if $enable-dark-mode {

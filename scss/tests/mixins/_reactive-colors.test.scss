@@ -1,0 +1,73 @@
+@import "../../functions";
+@import "../../variables";
+@import "../../mixins/reactive-colors";
+
+$original-enable-reactive-colors: $enable-reactive-colors;
+$original-enable-reactive-color-fallbacks: $enable-reactive-color-fallbacks;
+
+@include describe("reactive color mixins") {
+  @include it("emits only the reactive value by default") {
+    @include assert() {
+      @include output() {
+        .test {
+          @include reactive-color-mix-value(color, #0d6efd, color-mix(in srgb, var(--bs-primary), #000 20%));
+        }
+      }
+
+      @include expect() {
+        .test {
+          color: color-mix(in srgb, var(--bs-primary), #000 20%);
+        }
+      }
+    }
+  }
+
+  @include it("guards reactive overrides when fallbacks are enabled") {
+    $enable-reactive-color-fallbacks: true !global;
+
+    @include assert() {
+      @include output() {
+        .test {
+          @include reactive-color-mix-value(color, #0d6efd, color-mix(in srgb, var(--bs-primary), #000 20%));
+        }
+      }
+
+      @include expect() {
+        .test {
+          color: #0d6efd;
+        }
+
+        @supports (color: color-mix(in srgb, black, white)) {
+          .test {
+            color: color-mix(in srgb, var(--bs-primary), #000 20%);
+          }
+        }
+      }
+    }
+
+    $enable-reactive-color-fallbacks: false !global;
+  }
+
+  @include it("emits only the Sass value when reactive colors are disabled") {
+    $enable-reactive-colors: false !global;
+
+    @include assert() {
+      @include output() {
+        .test {
+          @include reactive-color-mix-value(color, #0d6efd, color-mix(in srgb, var(--bs-primary), #000 20%));
+        }
+      }
+
+      @include expect() {
+        .test {
+          color: #0d6efd;
+        }
+      }
+    }
+
+    $enable-reactive-colors: true !global;
+  }
+}
+
+$enable-reactive-colors: $original-enable-reactive-colors !global;
+$enable-reactive-color-fallbacks: $original-enable-reactive-color-fallbacks !global;

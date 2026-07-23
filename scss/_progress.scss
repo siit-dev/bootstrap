@@ -16,8 +16,8 @@
   --#{$prefix}progress-bg: #{$progress-bg};
   --#{$prefix}progress-border-radius: #{$progress-border-radius};
   --#{$prefix}progress-box-shadow: #{$progress-box-shadow};
-  --#{$prefix}progress-bar-color: #{$progress-bar-color};
-  --#{$prefix}progress-bar-bg: #{$progress-bar-bg};
+  --#{$prefix}progress-bar-color: #{if($enable-reactive-colors, var(--#{$prefix}primary-contrast), $progress-bar-color)};
+  --#{$prefix}progress-bar-bg: #{if($enable-reactive-colors, var(--#{$prefix}primary), $progress-bar-bg)};
   --#{$prefix}progress-bar-transition: #{$progress-bar-transition};
   // scss-docs-end progress-css-vars
 

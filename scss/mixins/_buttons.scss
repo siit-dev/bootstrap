@@ -60,6 +60,41 @@
 }
 // scss-docs-end btn-outline-variant-mixin
 
+// Internal runtime variants keep Bootstrap's public Sass mixins unchanged.
+@mixin button-reactive-variant($color) {
+  --#{$prefix}btn-color: var(--#{$prefix}#{$color}-contrast);
+  --#{$prefix}btn-bg: var(--#{$prefix}#{$color});
+  --#{$prefix}btn-border-color: var(--#{$prefix}#{$color});
+  --#{$prefix}btn-hover-color: var(--#{$prefix}#{$color}-contrast);
+  --#{$prefix}btn-hover-bg: color-mix(in srgb, var(--#{$prefix}#{$color}), var(--#{$prefix}black) #{$btn-hover-bg-shade-amount});
+  --#{$prefix}btn-hover-border-color: color-mix(in srgb, var(--#{$prefix}#{$color}), var(--#{$prefix}black) #{$btn-hover-border-shade-amount});
+  --#{$prefix}btn-focus-shadow-rgb: var(--#{$prefix}#{$color}-rgb);
+  --#{$prefix}btn-active-color: var(--#{$prefix}#{$color}-contrast);
+  --#{$prefix}btn-active-bg: color-mix(in srgb, var(--#{$prefix}#{$color}), var(--#{$prefix}black) #{$btn-active-bg-shade-amount});
+  --#{$prefix}btn-active-border-color: color-mix(in srgb, var(--#{$prefix}#{$color}), var(--#{$prefix}black) #{$btn-active-border-shade-amount});
+  --#{$prefix}btn-active-shadow: #{$btn-active-box-shadow};
+  --#{$prefix}btn-disabled-color: var(--#{$prefix}#{$color}-contrast);
+  --#{$prefix}btn-disabled-bg: var(--#{$prefix}#{$color});
+  --#{$prefix}btn-disabled-border-color: var(--#{$prefix}#{$color});
+}
+
+@mixin button-outline-reactive-variant($color) {
+  --#{$prefix}btn-color: var(--#{$prefix}#{$color});
+  --#{$prefix}btn-border-color: var(--#{$prefix}#{$color});
+  --#{$prefix}btn-hover-color: var(--#{$prefix}#{$color}-contrast);
+  --#{$prefix}btn-hover-bg: var(--#{$prefix}#{$color});
+  --#{$prefix}btn-hover-border-color: var(--#{$prefix}#{$color});
+  --#{$prefix}btn-focus-shadow-rgb: var(--#{$prefix}#{$color}-rgb);
+  --#{$prefix}btn-active-color: var(--#{$prefix}#{$color}-contrast);
+  --#{$prefix}btn-active-bg: var(--#{$prefix}#{$color});
+  --#{$prefix}btn-active-border-color: var(--#{$prefix}#{$color});
+  --#{$prefix}btn-active-shadow: #{$btn-active-box-shadow};
+  --#{$prefix}btn-disabled-color: var(--#{$prefix}#{$color});
+  --#{$prefix}btn-disabled-bg: transparent;
+  --#{$prefix}btn-disabled-border-color: var(--#{$prefix}#{$color});
+  --#{$prefix}gradient: none;
+}
+
 // scss-docs-start btn-size-mixin
 @mixin button-size($padding-y, $padding-x, $font-size, $border-radius) {
   --#{$prefix}btn-padding-y: #{$padding-y};

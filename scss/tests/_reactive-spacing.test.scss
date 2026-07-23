@@ -1,0 +1,11 @@
+@import "../functions";
+@import "../variables";
+@import "../maps";
+
+@include describe("reactive spacing defaults") {
+  @include it("derives the default scale and gutters from --bs-spacer") {
+    @include assert-equal(map-get($spacers, 3), var(--bs-spacer));
+    @include assert-equal(map-get($spacers, 4), calc(var(--bs-spacer) * 1.5));
+    @include assert-equal(map-get($gutters, 4), calc(var(--bs-spacer) * 1.5));
+  }
+}

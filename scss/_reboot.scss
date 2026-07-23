@@ -242,12 +242,22 @@ sup { top: -.5em; }
 // Links
 
 a {
-  color: rgba(var(--#{$prefix}link-color-rgb), var(--#{$prefix}link-opacity, 1));
   text-decoration: $link-decoration;
 
+  @if $enable-reactive-colors {
+    @include reactive-color-mix-value(color, rgba(var(--#{$prefix}link-color-rgb), var(--#{$prefix}link-opacity, 1)), color-mix(in srgb, var(--#{$prefix}link-color) calc(var(--#{$prefix}link-opacity, 1) * 100%), transparent));
+  } @else {
+    color: rgba(var(--#{$prefix}link-color-rgb), var(--#{$prefix}link-opacity, 1));
+  }
+
   &:hover {
-    --#{$prefix}link-color-rgb: var(--#{$prefix}link-hover-color-rgb);
     text-decoration: $link-hover-decoration;
+
+    @if $enable-reactive-colors {
+      @include reactive-color-mix-value(color, rgba(var(--#{$prefix}link-hover-color-rgb), var(--#{$prefix}link-opacity, 1)), color-mix(in srgb, var(--#{$prefix}link-hover-color) calc(var(--#{$prefix}link-opacity, 1) * 100%), transparent));
+    } @else {
+      --#{$prefix}link-color-rgb: var(--#{$prefix}link-hover-color-rgb);
+    }
   }
 }
 

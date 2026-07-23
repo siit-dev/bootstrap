@@ -151,7 +151,17 @@
 // and the colors of the striped, hovered & active tables
 
 @each $color, $value in $table-variants {
-  @include table-variant($color, $value);
+  @if not $enable-reactive-colors or $enable-reactive-color-fallbacks or not map-has-key($theme-colors, $color) or $color == "light" or $color == "dark" {
+    @include table-variant($color, $value);
+  }
+}
+
+@include reactive-color-mix-override() {
+  @each $color, $value in $table-variants {
+    @if map-has-key($theme-colors, $color) and $color != "light" and $color != "dark" {
+      @include table-reactive-variant($color);
+    }
+  }
 }
 
 // Responsive tables

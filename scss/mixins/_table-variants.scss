@@ -22,3 +22,20 @@
   }
 }
 // scss-docs-end table-variant
+
+@mixin table-reactive-variant($state) {
+  .table-#{$state} {
+    --#{$prefix}table-color: var(--#{$prefix}emphasis-color);
+    --#{$prefix}table-bg: color-mix(in srgb, var(--#{$prefix}#{$state}), var(--#{$prefix}white) 80%);
+    --#{$prefix}table-border-color: color-mix(in srgb, var(--#{$prefix}emphasis-color) #{$table-border-factor * 100%}, var(--#{$prefix}table-bg));
+    --#{$prefix}table-striped-bg: color-mix(in srgb, var(--#{$prefix}emphasis-color) #{$table-striped-bg-factor * 100%}, var(--#{$prefix}table-bg));
+    --#{$prefix}table-striped-color: var(--#{$prefix}emphasis-color);
+    --#{$prefix}table-active-bg: color-mix(in srgb, var(--#{$prefix}emphasis-color) #{$table-active-bg-factor * 100%}, var(--#{$prefix}table-bg));
+    --#{$prefix}table-active-color: var(--#{$prefix}emphasis-color);
+    --#{$prefix}table-hover-bg: color-mix(in srgb, var(--#{$prefix}emphasis-color) #{$table-hover-bg-factor * 100%}, var(--#{$prefix}table-bg));
+    --#{$prefix}table-hover-color: var(--#{$prefix}emphasis-color);
+
+    color: var(--#{$prefix}table-color);
+    border-color: var(--#{$prefix}table-border-color);
+  }
+}

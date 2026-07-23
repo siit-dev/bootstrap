@@ -1,0 +1,25 @@
+// Emit color-mix() rules directly for the lean build, or guard them so a
+// preceding static declaration survives in browsers that lack color-mix().
+@mixin reactive-color-mix-override {
+  @if $enable-reactive-colors {
+    @if $enable-reactive-color-fallbacks {
+      @supports (color: color-mix(in srgb, black, white)) {
+        @content;
+      }
+    } @else {
+      @content;
+    }
+  }
+}
+
+// Use this for individual properties. Grouped component variants should emit
+// their static and reactive blocks separately to avoid one @supports per value.
+@mixin reactive-color-mix-value($property, $fallback, $reactive) {
+  @if not $enable-reactive-colors or $enable-reactive-color-fallbacks {
+    #{$property}: #{$fallback};
+  }
+
+  @include reactive-color-mix-override() {
+    #{$property}: #{$reactive};
+  }
+}

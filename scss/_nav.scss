@@ -105,8 +105,8 @@
 .nav-pills {
   // scss-docs-start nav-pills-css-vars
   --#{$prefix}nav-pills-border-radius: #{$nav-pills-border-radius};
-  --#{$prefix}nav-pills-link-active-color: #{$nav-pills-link-active-color};
-  --#{$prefix}nav-pills-link-active-bg: #{$nav-pills-link-active-bg};
+  --#{$prefix}nav-pills-link-active-color: #{if($enable-reactive-colors, var(--#{$prefix}primary-contrast), $nav-pills-link-active-color)};
+  --#{$prefix}nav-pills-link-active-bg: #{if($enable-reactive-colors, var(--#{$prefix}primary), $nav-pills-link-active-bg)};
   // scss-docs-end nav-pills-css-vars
 
   .nav-link {

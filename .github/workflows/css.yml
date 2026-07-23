@@ -37,3 +37,8 @@ jobs:
 
       - name: Run CSS tests
         run: npm run css-test
+
+      - name: Run reactive CSS tests
+        run: npm run css-test-runtime
+        env:
+          REACTIVE_CSS_BROWSER: ChromeHeadless

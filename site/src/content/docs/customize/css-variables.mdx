@@ -68,3 +68,44 @@ Those variables are then reassigned to `:root` level CSS variables that can be c
 ## Grid breakpoints
 
 While we include our grid breakpoints as CSS variables (except for `xs`), be aware that **CSS variables do not work in media queries**. This is by design in the CSS spec for variables, but may change in coming years with support for `env()` variables. Check out [this Stack Overflow answer](https://stackoverflow.com/a/47212942) for some helpful links. In the meantime, you can use these variables in other CSS situations, as well as in your JavaScript.
+
+## Reactive colors and spacing
+
+This fork keeps a deliberately scoped runtime dependency graph. Changing a source variable updates supported derived values, but changing a derived value does not update its source.
+
+The light-mode graph covers semantic theme emphasis, subtle backgrounds and borders, links, focus rings, contextual buttons, alerts, tables, selected form states, nav pills, pagination, progress, and color utilities. Bootstrap's special `light` and `dark` emphasis/subtle leaves and table variants remain static to preserve their existing palette-specific values. Embedded SVG colors also remain compile-time values.
+
+Theme colors have two companion contracts:
+
+- `--bs-{color}-rgb` remains a comma-separated channel list for Bootstrap's opacity utilities and legacy consumers.
+- `--bs-{color}-contrast` supplies an explicit foreground because runtime `contrast-color()` is not sufficiently portable.
+
+When overriding a theme color, set all three values together:
+
+```css
+:root {
+  --bs-primary: #b4235f;
+  --bs-primary-rgb: 180, 35, 95;
+  --bs-primary-contrast: #fff;
+}
+```
+
+The default spacing map uses `--bs-spacer` for margin, padding, gap, enabled negative-margin, and gutter utilities. Utility names and media-query breakpoints remain compile-time Sass structures.
+
+```css
+:root {
+  --bs-spacer: 20px;
+}
+```
+
+### Browser fallback
+
+The default build requires `color-mix()`. Sass consumers can set `$enable-reactive-color-fallbacks: true` before importing Bootstrap. That mode emits static declarations first and puts reactive replacements inside `@supports (color: color-mix(...))`. Unsupported browsers therefore keep the compiled design, but their derived colors do not react to source-variable overrides.
+
+The fallback is progressive enhancement rather than a polyfill. A plain pair of custom-property declarations is insufficient because unsupported functions can remain valid custom-property token streams and only fail when the property is consumed.
+
+### Shopify palettes and design tokens
+
+Shopify themes should expose a small semantic `color_palette`, then render the full color, RGB channels, and explicit contrast companion into `:root`. See `examples/reactive-variables/bootstrap-palette-bridge.liquid` for a fixture shaped like the Beaute Directe palette.
+
+Figma/DTCG imports should preserve aliases and explicit dimension units. Do not infer `px` or `rem` from an untyped number. `examples/reactive-variables/bootstrap.tokens.json` shows the accepted shape, and `scss/runtime-tokens.json` describes the supported runtime boundary.
